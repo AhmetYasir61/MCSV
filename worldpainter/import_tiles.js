@@ -28,6 +28,16 @@ var layerMapPath = arguments[2] || 'worldpainter/layer_map.json';
 // Verilmezse WorldPainter'in varsayilani kullanilir; varsayilan eski bir biome
 // semasi tasiyorsa export sirasinda setNamedBiome hatasi alinir.
 var mapFormatSpec = arguments[3] || null;
+// 5. arguman: uygulanmayacak katmanlar, virgulle ("Jungle,Swamp" ya da "ALL").
+// WorldPainter'in otomatik biome atamasi bazi katmanlarda platformun biome
+// tablosu disina cikabiliyor (setNamedBiome ArrayIndexOutOfBounds); hangi
+// katmanin tetikledigini bulmak ve gecici olarak devre disi birakmak icin.
+var skipSpec = arguments[4] || '';
+var skipList = {};
+skipSpec.split(',').forEach(function (n) {
+    n = n.replace(/^\s+|\s+$/g, '');
+    if (n) { skipList[n.toUpperCase()] = true; }
+});
 
 function readJson(path) {
     return JSON.parse(new java.lang.String(
@@ -99,6 +109,11 @@ var applied = 0, skipped = [];
 
 for (var i = 0; i < layerNames.length; i++) {
     var lname = layerNames[i];
+    if (skipList.ALL || skipList[lname.toUpperCase()]) {
+        skipped.push(lname + ' (elle atlandi)');
+        continue;
+    }
+
     var def = layerMap[lname];
     if (!def) {
         skipped.push(lname + ' (layer_map.json icinde tanimsiz)');

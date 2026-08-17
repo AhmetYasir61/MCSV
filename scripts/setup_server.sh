@@ -38,7 +38,7 @@ if [[ $SKIP_APT -eq 0 ]]; then
     apt-get install -y -qq \
         python3 python3-pip python3-venv \
         default-jre-headless \
-        rsync curl unzip ca-certificates
+        rsync curl unzip ca-certificates tmux
 fi
 
 echo "==> python sanal ortami"
