@@ -1,192 +1,194 @@
 {
-  "_comment": "palette.json'daki vejetasyon/dekor adlarinin WorldPainter karsiligi. kind=builtin: WorldPainter'in hazir katmani, wp_layer adiyla cozumlenir. kind=object: dev agaclar/kayalar icin Custom Object Layer — script API'si bunu sifirdan olusturamaz, WorldPainter arayuzunde bir kez olusturup .layer olarak kaydedin ve yolunu layer_file alanina yazin. layer_file bos ise o katman atlanir, dunya yine uretilir. max_level: katmanin kabul ettigi en yuksek yogunluk seviyesi. Verilmezse script 15 deneyip hata alirsa 1'e duser (Frost gibi 1-bit katmanlar).",
+  "_comment": "palette.json'daki vejetasyon/dekor adlarinin WorldPainter karsiligi. wp_layer degerleri probe_layers.js ile dogrulanmis hazir katmanlardir: Annotations, Caverns, Caves, Chasms, Deciduous, Frost, Jungle, Pine, Populate, Resources, Swamp, Void. kind=object olanlarin hazir karsiligi yoktur; WorldPainter arayuzunde Custom Object Layer olusturup .layer olarak kaydedin ve yolunu layer_file'a yazin. Bos ise o katman atlanir, dunya yine uretilir. max_level: katmanin kabul ettigi en yuksek yogunluk (Frost 1-bit).",
+  "_probe": "Kurulu surumdeki hazir katmanlari listelemek: ./scripts/wp.sh worldpainter/probe_layers.js",
   "layers": {
     "MEGA_SPRUCE": {
-      "kind": "object",
-      "objects": "objects/mega_spruce/*.schematic",
-      "wp_layer": "MegaSpruce",
-      "layer_file": ""
+      "kind": "builtin",
+      "wp_layer": "Pine",
+      "max_level": 15,
+      "note": "mega ladin -> Pine (yuksek yogunluk)"
     },
     "SPRUCE": {
-      "kind": "object",
-      "objects": "objects/spruce/*.schematic",
-      "wp_layer": "Spruce",
-      "layer_file": ""
+      "kind": "builtin",
+      "wp_layer": "Pine",
+      "max_level": 15
     },
     "MEGA_OAK": {
-      "kind": "object",
-      "objects": "objects/mega_oak/*.schematic",
-      "wp_layer": "MegaOak",
-      "layer_file": ""
+      "kind": "builtin",
+      "wp_layer": "Deciduous",
+      "max_level": 15,
+      "note": "mega mese -> Deciduous"
     },
     "MEGA_DARK_OAK": {
-      "kind": "object",
-      "objects": "objects/mega_dark_oak/*.schematic",
-      "wp_layer": "MegaDarkOak",
-      "layer_file": ""
+      "kind": "builtin",
+      "wp_layer": "Deciduous",
+      "max_level": 15,
+      "note": "kara mese -> Deciduous (yogun)"
     },
     "BIRCH_TALL": {
-      "kind": "object",
-      "objects": "objects/birch_tall/*.schematic",
-      "wp_layer": "TallBirch",
-      "layer_file": ""
+      "kind": "builtin",
+      "wp_layer": "Deciduous",
+      "max_level": 15
     },
     "MEGA_JUNGLE": {
-      "kind": "object",
-      "objects": "objects/mega_jungle/*.schematic",
-      "wp_layer": "MegaJungle",
-      "layer_file": ""
+      "kind": "builtin",
+      "wp_layer": "Jungle",
+      "max_level": 15,
+      "note": "dev jungle kanopisi -> Jungle"
     },
     "JUNGLE_CANOPY": {
-      "kind": "object",
-      "objects": "objects/jungle_canopy/*.schematic",
-      "wp_layer": "JungleCanopy",
-      "layer_file": ""
-    },
-    "ACACIA_SPREAD": {
-      "kind": "object",
-      "objects": "objects/acacia/*.schematic",
-      "wp_layer": "AcaciaSpread",
-      "layer_file": ""
-    },
-    "BAOBAB": {
-      "kind": "object",
-      "objects": "objects/baobab/*.schematic",
-      "wp_layer": "Baobab",
-      "layer_file": ""
-    },
-    "PALM_TALL": {
-      "kind": "object",
-      "objects": "objects/palm/*.schematic",
-      "wp_layer": "Palm",
-      "layer_file": ""
+      "kind": "builtin",
+      "wp_layer": "Jungle",
+      "max_level": 15
     },
     "MANGROVE": {
-      "kind": "object",
-      "objects": "objects/mangrove/*.schematic",
-      "wp_layer": "Mangrove",
-      "layer_file": ""
+      "kind": "builtin",
+      "wp_layer": "Swamp",
+      "max_level": 15,
+      "note": "mangrov -> Swamp"
     },
     "SWAMP_OAK": {
-      "kind": "object",
-      "objects": "objects/swamp_oak/*.schematic",
-      "wp_layer": "SwampOak",
-      "layer_file": ""
+      "kind": "builtin",
+      "wp_layer": "Swamp",
+      "max_level": 15
     },
-    "DEAD_TREE_TALL": {
-      "kind": "object",
-      "objects": "objects/dead_tree/*.schematic",
-      "wp_layer": "DeadTree",
-      "layer_file": ""
+    "ACACIA_SPREAD": {
+      "kind": "builtin",
+      "wp_layer": "Deciduous",
+      "max_level": 15,
+      "note": "akasya -> Deciduous (savanna seyrekligi maskeyle)"
     },
-    "OBSIDIAN_SPIRE": {
-      "kind": "object",
-      "objects": "objects/spire/*.schematic",
-      "wp_layer": "ObsidianSpire",
-      "layer_file": ""
+    "BAOBAB": {
+      "kind": "builtin",
+      "wp_layer": "Deciduous",
+      "max_level": 15
     },
-    "HUGE_MUSHROOM": {
-      "kind": "object",
-      "objects": "objects/mushroom/*.schematic",
-      "wp_layer": "HugeMushroom",
-      "layer_file": ""
-    },
-    "FALLEN_LOG": {
-      "kind": "object",
-      "objects": "objects/fallen_log/*.schematic",
-      "wp_layer": "FallenLog",
-      "layer_file": ""
-    },
-    "BOULDER": {
-      "kind": "object",
-      "objects": "objects/boulder/*.schematic",
-      "wp_layer": "Boulder",
-      "layer_file": ""
-    },
-    "MOSSY_ROCK": {
-      "kind": "object",
-      "objects": "objects/mossy_rock/*.schematic",
-      "wp_layer": "MossyRock",
-      "layer_file": ""
-    },
-    "MAGMA_VENT": {
-      "kind": "object",
-      "objects": "objects/magma_vent/*.schematic",
-      "wp_layer": "MagmaVent",
-      "layer_file": ""
-    },
-    "CACTUS_TALL": {
-      "kind": "object",
-      "objects": "objects/cactus/*.schematic",
-      "wp_layer": "TallCactus",
-      "layer_file": ""
+    "PALM_TALL": {
+      "kind": "builtin",
+      "wp_layer": "Jungle",
+      "max_level": 15,
+      "note": "palmiye -> Jungle (seyrek maske)"
     },
     "GRASS_TALL": {
       "kind": "builtin",
       "wp_layer": "Jungle",
-      "note": "uzun ot + fern yogunlugu"
+      "max_level": 15
     },
     "GRASS_TALL_DRY": {
       "kind": "builtin",
       "wp_layer": "Jungle",
-      "note": "savanna icin kuru uzun ot"
+      "max_level": 15
     },
     "GRASS_SHORT": {
       "kind": "builtin",
-      "wp_layer": "Jungle"
+      "wp_layer": "Jungle",
+      "max_level": 15
     },
     "GRASS_SHORT_DRY": {
       "kind": "builtin",
-      "wp_layer": "Jungle"
+      "wp_layer": "Jungle",
+      "max_level": 15
     },
     "FERN_LARGE": {
       "kind": "builtin",
-      "wp_layer": "Jungle"
-    },
-    "FLOWERS_MIXED": {
-      "kind": "builtin",
-      "wp_layer": "Flowers"
+      "wp_layer": "Jungle",
+      "max_level": 15
     },
     "MOSS_CARPET": {
       "kind": "builtin",
-      "wp_layer": "Jungle"
+      "wp_layer": "Jungle",
+      "max_level": 15
     },
     "VINES": {
       "kind": "builtin",
-      "wp_layer": "Jungle"
+      "wp_layer": "Jungle",
+      "max_level": 15
     },
     "BAMBOO": {
       "kind": "builtin",
-      "wp_layer": "Jungle"
-    },
-    "LILY_PAD": {
-      "kind": "builtin",
-      "wp_layer": "Swamp"
+      "wp_layer": "Jungle",
+      "max_level": 15
     },
     "SWEET_BERRY": {
       "kind": "builtin",
-      "wp_layer": "Jungle"
+      "wp_layer": "Jungle",
+      "max_level": 15
     },
-    "DEAD_BUSH": {
+    "SEAGRASS": {
       "kind": "builtin",
-      "wp_layer": "DeadShrubs"
+      "wp_layer": "Jungle",
+      "max_level": 15
+    },
+    "KELP": {
+      "kind": "builtin",
+      "wp_layer": "Jungle",
+      "max_level": 15
+    },
+    "CORAL": {
+      "kind": "builtin",
+      "wp_layer": "Jungle",
+      "max_level": 15
+    },
+    "LILY_PAD": {
+      "kind": "builtin",
+      "wp_layer": "Swamp",
+      "max_level": 15
     },
     "SNOW_LAYER": {
       "kind": "builtin",
       "wp_layer": "Frost",
-      "max_level": 1
+      "max_level": 1,
+      "note": "Frost 1-bit katman"
     },
-    "SEAGRASS": {
-      "kind": "builtin",
-      "wp_layer": "Jungle"
+    "DEAD_TREE_TALL": {
+      "kind": "object",
+      "layer_file": "",
+      "note": "olu agac: custom object gerekir"
     },
-    "KELP": {
-      "kind": "builtin",
-      "wp_layer": "Jungle"
+    "OBSIDIAN_SPIRE": {
+      "kind": "object",
+      "layer_file": "",
+      "note": "obsidyen kule: custom object gerekir"
     },
-    "CORAL": {
-      "kind": "builtin",
-      "wp_layer": "Jungle"
+    "HUGE_MUSHROOM": {
+      "kind": "object",
+      "layer_file": "",
+      "note": "dev mantar: custom object gerekir"
+    },
+    "FALLEN_LOG": {
+      "kind": "object",
+      "layer_file": "",
+      "note": "devrik kutuk: custom object gerekir"
+    },
+    "BOULDER": {
+      "kind": "object",
+      "layer_file": "",
+      "note": "kaya blogu: custom object gerekir"
+    },
+    "MOSSY_ROCK": {
+      "kind": "object",
+      "layer_file": "",
+      "note": "yosunlu kaya: custom object gerekir"
+    },
+    "MAGMA_VENT": {
+      "kind": "object",
+      "layer_file": "",
+      "note": "magma bacasi: custom object gerekir"
+    },
+    "CACTUS_TALL": {
+      "kind": "object",
+      "layer_file": "",
+      "note": "kaktus: custom object gerekir"
+    },
+    "DEAD_BUSH": {
+      "kind": "object",
+      "layer_file": "",
+      "note": "olu cali: hazir katman yok, custom object gerekir"
+    },
+    "FLOWERS_MIXED": {
+      "kind": "object",
+      "layer_file": "",
+      "note": "cicek: hazir katman yok, custom object gerekir"
     }
   }
 }
