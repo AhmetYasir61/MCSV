@@ -174,3 +174,23 @@ py tools\make_preview.py build --out preview\index.html
 
 Python kurulu değilse: https://www.python.org/downloads/windows/ — kurulumda
 **"Add python.exe to PATH"** kutusunu işaretleyin ve sonra PowerShell'i yeniden açın.
+
+### WorldPainter adımı (Windows)
+
+`JAVA_OPTS="-Xmx24G" wpscript ...` yazımı bash'e özgüdür; PowerShell'de hata verir.
+Bunun yerine:
+
+```powershell
+.\worldpainter\run_worldpainter.ps1 -Manifest build\manifest.json -Out out\GoT-World -MemoryGB 24
+```
+
+Betik `wpscript.cmd`'yi PATH'te ve tipik kurulum klasörlerinde arar, `JAVA_OPTS`'u
+`$env:` ile doğru şekilde ayarlar ve `import_tiles.js` + `layer_map.json` yollarını
+kendisi verir. Kurulum yolunu elle vermek gerekirse `-WpScript "C:\Program Files\WorldPainter\wpscript.cmd"`.
+
+Elle yapmak isterseniz PowerShell karşılığı şudur:
+
+```powershell
+$env:JAVA_OPTS = "-Xmx24G"
+wpscript worldpainter\import_tiles.js build\manifest.json out\GoT-World worldpainter\layer_map.json
+```
