@@ -163,6 +163,19 @@ if (skipped.length) {
 
 // --- 3) Kaydet ve disa aktar ----------------------------------------------
 print('');
+// Hedef klasoru olustur: saveWorld/exportWorld var olmayan dizine yazmiyor.
+var outFile = new java.io.File(outDir).getAbsoluteFile();
+var outParent = outFile.getParentFile();
+if (outParent && !outParent.isDirectory()) {
+    if (!outParent.mkdirs()) {
+        throw 'hedef klasor olusturulamadi: ' + outParent;
+    }
+    print('hedef klasor olusturuldu: ' + outParent);
+}
+if (!outFile.isDirectory() && !outFile.mkdirs()) {
+    throw 'export klasoru olusturulamadi: ' + outFile;
+}
+
 print('Kaydediliyor: ' + outDir + '.world');
 wp.saveWorld(world).toFile(outDir + '.world').go();
 

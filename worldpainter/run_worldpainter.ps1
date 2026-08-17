@@ -22,7 +22,8 @@ param(
     [string]$WpScript = "",
     [string]$InstallDir = "",
     [switch]$Doctor,
-    [switch]$Probe
+    [switch]$Probe,
+    [switch]$ProbeLayers
 )
 
 $ErrorActionPreference = "Stop"
@@ -109,9 +110,9 @@ if ($Doctor) {
 
 # -Probe: kurulu surumun Scripting API'sini listeler (import_tiles.js'i dogru
 # imzalara gore yazmak icin). Manifest gerektirmez.
-if ($Probe) {
+if ($Probe -or $ProbeLayers) {
     # NOT: degisken adi $Probe olmamali - switch parametresiyle ayni degisken olur.
-    $probeScript = Join-Path $PSScriptRoot "probe_api.js"
+    $probeScript = Join-Path $PSScriptRoot $(if ($ProbeLayers) { "probe_layers.js" } else { "probe_api.js" })
     if ($wp) {
         & $wp $probeScript
     } elseif ($dir -and $java) {
