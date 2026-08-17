@@ -1,5 +1,5 @@
 {
-  "_comment": "palette.json'daki vejetasyon/dekor adlarinin WorldPainter karsiligi. kind=builtin: WorldPainter'in hazir katmani, wp_layer adiyla cozumlenir. kind=object: dev agaclar/kayalar icin Custom Object Layer — script API'si bunu sifirdan olusturamaz, WorldPainter arayuzunde bir kez olusturup .layer olarak kaydedin ve yolunu layer_file alanina yazin. layer_file bos ise o katman atlanir, dunya yine uretilir.",
+  "_comment": "palette.json'daki vejetasyon/dekor adlarinin WorldPainter karsiligi. kind=builtin: WorldPainter'in hazir katmani, wp_layer adiyla cozumlenir. kind=object: dev agaclar/kayalar icin Custom Object Layer — script API'si bunu sifirdan olusturamaz, WorldPainter arayuzunde bir kez olusturup .layer olarak kaydedin ve yolunu layer_file alanina yazin. layer_file bos ise o katman atlanir, dunya yine uretilir. max_level: katmanin kabul ettigi en yuksek yogunluk seviyesi. Verilmezse script 15 deneyip hata alirsa 1'e duser (Frost gibi 1-bit katmanlar).",
   "layers": {
     "MEGA_SPRUCE": {
       "kind": "object",
@@ -173,7 +173,8 @@
     },
     "SNOW_LAYER": {
       "kind": "builtin",
-      "wp_layer": "Frost"
+      "wp_layer": "Frost",
+      "max_level": 1
     },
     "SEAGRASS": {
       "kind": "builtin",

@@ -119,17 +119,37 @@ for (var i = 0; i < layerNames.length; i++) {
     }
 
     var mask = wp.getHeightMap().fromFile(maskFile.getAbsolutePath()).go();
-    wp.applyHeightMap(mask)
-      .toWorld(world)
-      .scale(scalePct)
-      .fromLevels(1, 255)          // 0 = katman yok
-      .toLevels(1, 15)             // WorldPainter katman yogunlugu
-      .applyToLayer(layer)
-      .setAlways()
-      .go();
+
+    // Katmanlarin bit genisligi farkli: Frost gibi 1-bit katmanlar yalnizca 0/1
+    // kabul eder, Jungle/Flowers gibi katmanlar 0-15. Hangisinin kac bit oldugunu
+    // tahmin etmek yerine yuksekten baslayip hata alinca dusuyoruz. Istenen
+    // seviye layer_map.json'da "max_level" ile sabitlenebilir.
+    var levels = def.max_level ? [def.max_level] : [15, 1];
+    var ok = false, lastErr = null;
+    for (var li2 = 0; li2 < levels.length; li2++) {
+        try {
+            wp.applyHeightMap(mask)
+              .toWorld(world)
+              .scale(scalePct)
+              .fromLevels(1, 255)          // 0 = katman yok
+              .toLevels(1, levels[li2])
+              .applyToLayer(layer)
+              .setAlways()
+              .go();
+            ok = true;
+            print('  katman: ' + lname + ' -> ' + (def.wp_layer || def.layer_file) +
+                  '  (0-' + levels[li2] + ')');
+            break;
+        } catch (e2) {
+            lastErr = e2;
+        }
+    }
+    if (!ok) {
+        skipped.push(lname + ' (' + lastErr + ')');
+        continue;
+    }
 
     applied++;
-    print('  katman: ' + lname + ' -> ' + (def.wp_layer || def.layer_file));
 }
 
 print('');
