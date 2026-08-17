@@ -3,6 +3,7 @@
 #   .\worldpainter\run_worldpainter.ps1
 #   .\worldpainter\run_worldpainter.ps1 -Manifest build\manifest.json -Out out\GoT-World -MemoryGB 24
 #   .\worldpainter\run_worldpainter.ps1 -Doctor        # sadece ne bulundugunu yazar
+#   .\worldpainter\run_worldpainter.ps1 -Probe         # kurulu surumun API'sini listeler
 #
 # Kurulum baska bir surucude ise (ornek E:\WorldPainter) betik onu kendisi bulur;
 # bulamazsa -InstallDir ile yolu verin.
@@ -20,7 +21,8 @@ param(
     [int]$MemoryGB = 24,
     [string]$WpScript = "",
     [string]$InstallDir = "",
-    [switch]$Doctor
+    [switch]$Doctor,
+    [switch]$Probe
 )
 
 $ErrorActionPreference = "Stop"
@@ -103,6 +105,23 @@ if ($Doctor) {
     Write-Host "kurulum dizini: $(if ($dir) { $dir } else { 'bulunamadi' })"
     Write-Host "java       : $(if ($java) { $java } else { 'bulunamadi' })"
     exit 0
+}
+
+# -Probe: kurulu surumun Scripting API'sini listeler (import_tiles.js'i dogru
+# imzalara gore yazmak icin). Manifest gerektirmez.
+if ($Probe) {
+    $probe = Join-Path $PSScriptRoot "probe_api.js"
+    if ($wp) {
+        & $wp $probe
+    } elseif ($dir -and $java) {
+        $cp = @((Join-Path $dir "*"), (Join-Path $dir "lib\*"),
+                (Join-Path $dir "app\*"), (Join-Path $dir "app\lib\*")) -join ";"
+        & $java "-cp" $cp "org.pepsoft.worldpainter.tools.ScriptingTool" $probe
+    } else {
+        Write-Host "WorldPainter bulunamadi; -Doctor ile bakin." -ForegroundColor Red
+        exit 1
+    }
+    exit $LASTEXITCODE
 }
 
 if (-not (Test-Path $Manifest)) {
