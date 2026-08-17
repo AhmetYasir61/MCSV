@@ -10,12 +10,15 @@
 
 var ids = [
     'JAVA_ANVIL', 'JAVA_ANVIL_1_15', 'JAVA_ANVIL_1_17', 'JAVA_ANVIL_1_18',
-    'JAVA_ANVIL_1_19', 'JAVA_ANVIL_1_20', 'JAVA_ANVIL_1_21', 'JAVA_MCREGION'
+    'JAVA_ANVIL_1_19', 'JAVA_ANVIL_1_20', 'JAVA_ANVIL_1_21', 'JAVA_ANVIL_1_21_5',
+    'JAVA_ANVIL_1_21_9', 'JAVA_MCREGION'
 ];
 var names = [
     'Minecraft 1.12', 'Minecraft 1.13', 'Minecraft 1.14', 'Minecraft 1.15',
     'Minecraft 1.16', 'Minecraft 1.17', 'Minecraft 1.18', 'Minecraft 1.19',
-    'Minecraft 1.20', 'Minecraft 1.21', 'Minecraft 1.21.5'
+    'Minecraft 1.20', 'Minecraft 1.21', 'Minecraft 1.21.2', 'Minecraft 1.21.4',
+    'Minecraft 1.21.5', 'Minecraft 1.21.6', 'Minecraft 1.21.8', 'Minecraft 1.21.9',
+    'Minecraft 1.21.11'
 ];
 
 function tryAll(list, how) {
