@@ -199,3 +199,15 @@ Elle yapmak isterseniz PowerShell karşılığı şudur:
 $env:JAVA_OPTS = "-Xmx24G"
 wpscript worldpainter\import_tiles.js build\manifest.json out\GoT-World worldpainter\layer_map.json
 ```
+
+## Sunucuya kurulum (Debian + Pelican Panel)
+
+Dünyayı Wings düğümündeki sunucu volume'üne kurar:
+
+```bash
+sudo ./scripts/deploy_pelican.sh --uuid <sunucu-uuid> --world out/GoT-World
+```
+
+Yedek alır, `level-name`'i ayarlar ve dosya sahipliğini volume dizininden okuyup
+uygular. Ayrıntı, SFTP alternatifi, disk limiti ve dünya sınırı ayarları:
+[docs/PELICAN.md](docs/PELICAN.md).
