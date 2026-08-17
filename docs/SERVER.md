@@ -44,6 +44,19 @@ Tek komutta üretip kurmak:
 
 Sunucu bu adımda panelden **durdurulmuş** olmalı.
 
+## wpscript'i elle çağırmak
+
+`wpscript` kurulumdan sonra PATH'te olmayabilir. Sarmalayıcı onu bulur, belleği
+ve headless ayarını kendisi verir:
+
+```bash
+./scripts/wp.sh worldpainter/probe_layers.js
+./scripts/wp.sh worldpainter/import_tiles.js build/manifest.json out/GoT-World worldpainter/layer_map.json
+```
+
+Yolu biliyorsan: `WPSCRIPT=/opt/worldpainter/wpscript ./scripts/wp.sh ...`
+Belleği elle vermek için: `WP_MEMORY_GB=8 ./scripts/wp.sh ...`
+
 ## Uzun süren üretim
 
 `--scale 16` bile saatler sürebilir; SSH kopunca iş ölmesin diye `screen`/`tmux`
