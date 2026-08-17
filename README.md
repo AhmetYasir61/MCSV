@@ -127,3 +127,21 @@ adımı ve yüzlerce GB çıktı gerekir. Yerelde üretip aynı release'e eklers
 ```bash
 gh release upload v0.1.0 GoT-World.zip
 ```
+
+## Ayrı, klonlanabilir harita deposu
+
+Haritayı tek başına klonlanabilir temiz bir depoda yayınlamak için:
+
+```bash
+./scripts/setup_map_repo.sh westeros-world-maps
+```
+
+Betik depoyu `gh` ile açar, içeriği push eder ve `source/` altında kaynak PNG
+varsa karoları + önizlemeyi üretip `v0.1.0` release'ini varlıklarıyla oluşturur.
+Sonrasında indirmek isteyen:
+
+```bash
+git clone https://github.com/<kullanıcı>/westeros-world-maps.git
+# ya da sadece paket:
+gh release download v0.1.0 --repo <kullanıcı>/westeros-world-maps
+```
