@@ -211,3 +211,15 @@ sudo ./scripts/deploy_pelican.sh --uuid <sunucu-uuid> --world out/GoT-World
 Yedek alır, `level-name`'i ayarlar ve dosya sahipliğini volume dizininden okuyup
 uygular. Ayrıntı, SFTP alternatifi, disk limiti ve dünya sınırı ayarları:
 [docs/PELICAN.md](docs/PELICAN.md).
+
+## Dünyayı sunucuda üretmek
+
+Bilgisayarında yer yoksa üretim doğrudan Debian sunucuda yapılabilir:
+
+```bash
+sudo ./scripts/setup_server.sh                       # Python, Java, WorldPainter
+./scripts/build_world.sh --source source/westeros.png --scale 16 \
+  --deploy-uuid <sunucu-uuid> --level-name GameOFThrones
+```
+
+Ayrıntı: [docs/SERVER.md](docs/SERVER.md).
