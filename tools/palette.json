@@ -1,22 +1,897 @@
 {
-  "_comment": "Kaynak dunya haritasindaki renkler -> arazi sinifi. RGB degerleri en yakin komsu ile eslesir.",
+  "_comment": "Kaynak harita rengi -> arazi sinifi. RGB en yakin komsu ile eslesir. 'vegetation' alani WorldPainter katmanlarina cevrilir; amac duz vanilla agac serpistirmesi degil, biome'a ozgu dev agac/dekor dokusu.",
+  "_vegetation_fields": {
+    "trees": "custom object / tree katmanlari. density 0-100 (chunk basina yogunluk), size gorsel olcek",
+    "ground": "yer ortusu katmanlari (uzun ot, calilik, kaktus, olu cali)",
+    "surface": "yuzey blok karisimi; oran toplami 100 olmalidir",
+    "terrace": "varsa badlands/col tipi basamakli asinma; height ve variation blok cinsinden",
+    "ridge": "0-1; sirt gurultusu agirligi. 1 = keskin, sivri zirveler (dag, Valyria), 0.35 = varsayilan yumusak arazi"
+  },
   "classes": [
-    { "id": 0,  "name": "ocean",            "rgb": [42, 63, 115],  "biome": "OCEAN",              "base_height": 24,  "relief": 4,  "water": true },
-    { "id": 1,  "name": "shallow_sea",      "rgb": [70, 100, 160], "biome": "LUKEWARM_OCEAN",     "base_height": 44,  "relief": 3,  "water": true },
-    { "id": 2,  "name": "ice_north",        "rgb": [236, 240, 245],"biome": "SNOWY_TAIGA",        "base_height": 78,  "relief": 26, "water": false },
-    { "id": 3,  "name": "tundra",           "rgb": [196, 208, 200],"biome": "SNOWY_PLAINS",       "base_height": 74,  "relief": 14, "water": false },
-    { "id": 4,  "name": "boreal_forest",    "rgb": [61, 84, 48],   "biome": "TAIGA",              "base_height": 80,  "relief": 22, "water": false },
-    { "id": 5,  "name": "temperate_forest", "rgb": [86, 122, 62],  "biome": "FOREST",             "base_height": 78,  "relief": 18, "water": false },
-    { "id": 6,  "name": "deep_forest",      "rgb": [52, 74, 40],   "biome": "DARK_FOREST",        "base_height": 80,  "relief": 20, "water": false },
-    { "id": 7,  "name": "grassland",        "rgb": [122, 158, 88], "biome": "PLAINS",             "base_height": 72,  "relief": 10, "water": false },
-    { "id": 8,  "name": "highland",         "rgb": [150, 152, 148],"biome": "WINDSWEPT_HILLS",    "base_height": 108, "relief": 46, "water": false },
-    { "id": 9,  "name": "mountain",         "rgb": [186, 188, 186],"biome": "JAGGED_PEAKS",       "base_height": 148, "relief": 78, "water": false },
-    { "id": 10, "name": "steppe",           "rgb": [166, 124, 84], "biome": "SAVANNA",            "base_height": 82,  "relief": 20, "water": false },
-    { "id": 11, "name": "dothraki_sea",     "rgb": [226, 126, 44], "biome": "SAVANNA_PLATEAU",    "base_height": 84,  "relief": 12, "water": false },
-    { "id": 12, "name": "desert",           "rgb": [226, 214, 176],"biome": "DESERT",             "base_height": 76,  "relief": 16, "water": false },
-    { "id": 13, "name": "red_waste",        "rgb": [150, 92, 74],  "biome": "BADLANDS",           "base_height": 88,  "relief": 34, "water": false },
-    { "id": 14, "name": "jungle",           "rgb": [46, 140, 46],  "biome": "JUNGLE",             "base_height": 76,  "relief": 18, "water": false },
-    { "id": 15, "name": "swamp",            "rgb": [96, 116, 74],  "biome": "SWAMP",              "base_height": 66,  "relief": 5,  "water": false },
-    { "id": 16, "name": "volcanic",         "rgb": [120, 108, 118],"biome": "STONY_PEAKS",        "base_height": 140, "relief": 70, "water": false }
+    {
+      "id": 0,
+      "name": "ocean",
+      "rgb": [
+        42,
+        63,
+        115
+      ],
+      "biome": "OCEAN",
+      "base_height": 24,
+      "relief": 4,
+      "water": true,
+      "vegetation": {
+        "trees": [],
+        "ground": [
+          {
+            "type": "SEAGRASS",
+            "density": 18
+          },
+          {
+            "type": "KELP",
+            "density": 22
+          }
+        ],
+        "surface": [
+          {
+            "block": "GRAVEL",
+            "pct": 55
+          },
+          {
+            "block": "SAND",
+            "pct": 45
+          }
+        ]
+      }
+    },
+    {
+      "id": 1,
+      "name": "shallow_sea",
+      "rgb": [
+        70,
+        100,
+        160
+      ],
+      "biome": "LUKEWARM_OCEAN",
+      "base_height": 44,
+      "relief": 3,
+      "water": true,
+      "vegetation": {
+        "trees": [],
+        "ground": [
+          {
+            "type": "SEAGRASS",
+            "density": 34
+          },
+          {
+            "type": "CORAL",
+            "density": 8
+          }
+        ],
+        "surface": [
+          {
+            "block": "SAND",
+            "pct": 80
+          },
+          {
+            "block": "GRAVEL",
+            "pct": 20
+          }
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "name": "ice_north",
+      "rgb": [
+        236,
+        240,
+        245
+      ],
+      "biome": "SNOWY_TAIGA",
+      "base_height": 78,
+      "relief": 26,
+      "water": false,
+      "vegetation": {
+        "trees": [
+          {
+            "type": "MEGA_SPRUCE",
+            "density": 26,
+            "size": 1.4
+          },
+          {
+            "type": "SPRUCE",
+            "density": 14,
+            "size": 1.0
+          }
+        ],
+        "ground": [
+          {
+            "type": "SNOW_LAYER",
+            "density": 95
+          },
+          {
+            "type": "DEAD_BUSH",
+            "density": 4
+          }
+        ],
+        "surface": [
+          {
+            "block": "SNOW_BLOCK",
+            "pct": 70
+          },
+          {
+            "block": "PERMAFROST",
+            "pct": 25
+          },
+          {
+            "block": "STONE",
+            "pct": 5
+          }
+        ]
+      },
+      "ridge": 0.5
+    },
+    {
+      "id": 3,
+      "name": "tundra",
+      "rgb": [
+        196,
+        208,
+        200
+      ],
+      "biome": "SNOWY_PLAINS",
+      "base_height": 74,
+      "relief": 14,
+      "water": false,
+      "vegetation": {
+        "trees": [
+          {
+            "type": "SPRUCE",
+            "density": 6,
+            "size": 0.9
+          }
+        ],
+        "ground": [
+          {
+            "type": "SNOW_LAYER",
+            "density": 80
+          },
+          {
+            "type": "GRASS_SHORT",
+            "density": 10
+          }
+        ],
+        "surface": [
+          {
+            "block": "SNOW_BLOCK",
+            "pct": 45
+          },
+          {
+            "block": "PODZOL",
+            "pct": 35
+          },
+          {
+            "block": "STONE",
+            "pct": 20
+          }
+        ]
+      }
+    },
+    {
+      "id": 4,
+      "name": "boreal_forest",
+      "rgb": [
+        61,
+        84,
+        48
+      ],
+      "biome": "TAIGA",
+      "base_height": 80,
+      "relief": 22,
+      "water": false,
+      "vegetation": {
+        "trees": [
+          {
+            "type": "MEGA_SPRUCE",
+            "density": 46,
+            "size": 1.6
+          },
+          {
+            "type": "SPRUCE",
+            "density": 24,
+            "size": 1.1
+          }
+        ],
+        "ground": [
+          {
+            "type": "FERN_LARGE",
+            "density": 40
+          },
+          {
+            "type": "SWEET_BERRY",
+            "density": 8
+          },
+          {
+            "type": "MOSSY_ROCK",
+            "density": 10
+          }
+        ],
+        "surface": [
+          {
+            "block": "PODZOL",
+            "pct": 60
+          },
+          {
+            "block": "GRASS_BLOCK",
+            "pct": 30
+          },
+          {
+            "block": "COARSE_DIRT",
+            "pct": 10
+          }
+        ]
+      },
+      "ridge": 0.4
+    },
+    {
+      "id": 5,
+      "name": "temperate_forest",
+      "rgb": [
+        86,
+        122,
+        62
+      ],
+      "biome": "FOREST",
+      "base_height": 78,
+      "relief": 18,
+      "water": false,
+      "vegetation": {
+        "trees": [
+          {
+            "type": "MEGA_OAK",
+            "density": 38,
+            "size": 1.7
+          },
+          {
+            "type": "BIRCH_TALL",
+            "density": 18,
+            "size": 1.3
+          }
+        ],
+        "ground": [
+          {
+            "type": "GRASS_TALL",
+            "density": 55
+          },
+          {
+            "type": "FLOWERS_MIXED",
+            "density": 14
+          },
+          {
+            "type": "FALLEN_LOG",
+            "density": 6
+          }
+        ],
+        "surface": [
+          {
+            "block": "GRASS_BLOCK",
+            "pct": 80
+          },
+          {
+            "block": "COARSE_DIRT",
+            "pct": 15
+          },
+          {
+            "block": "MOSS_BLOCK",
+            "pct": 5
+          }
+        ]
+      }
+    },
+    {
+      "id": 6,
+      "name": "deep_forest",
+      "rgb": [
+        52,
+        74,
+        40
+      ],
+      "biome": "DARK_FOREST",
+      "base_height": 80,
+      "relief": 20,
+      "water": false,
+      "vegetation": {
+        "trees": [
+          {
+            "type": "MEGA_DARK_OAK",
+            "density": 62,
+            "size": 2.0
+          },
+          {
+            "type": "MEGA_OAK",
+            "density": 20,
+            "size": 1.6
+          }
+        ],
+        "ground": [
+          {
+            "type": "GRASS_TALL",
+            "density": 45
+          },
+          {
+            "type": "HUGE_MUSHROOM",
+            "density": 9
+          },
+          {
+            "type": "MOSS_CARPET",
+            "density": 25
+          }
+        ],
+        "surface": [
+          {
+            "block": "GRASS_BLOCK",
+            "pct": 55
+          },
+          {
+            "block": "PODZOL",
+            "pct": 30
+          },
+          {
+            "block": "MOSS_BLOCK",
+            "pct": 15
+          }
+        ]
+      }
+    },
+    {
+      "id": 7,
+      "name": "grassland",
+      "rgb": [
+        122,
+        158,
+        88
+      ],
+      "biome": "PLAINS",
+      "base_height": 72,
+      "relief": 10,
+      "water": false,
+      "vegetation": {
+        "trees": [
+          {
+            "type": "MEGA_OAK",
+            "density": 8,
+            "size": 1.8
+          }
+        ],
+        "ground": [
+          {
+            "type": "GRASS_TALL",
+            "density": 70
+          },
+          {
+            "type": "FLOWERS_MIXED",
+            "density": 20
+          }
+        ],
+        "surface": [
+          {
+            "block": "GRASS_BLOCK",
+            "pct": 92
+          },
+          {
+            "block": "COARSE_DIRT",
+            "pct": 8
+          }
+        ]
+      }
+    },
+    {
+      "id": 8,
+      "name": "highland",
+      "rgb": [
+        150,
+        152,
+        148
+      ],
+      "biome": "WINDSWEPT_HILLS",
+      "base_height": 108,
+      "relief": 46,
+      "water": false,
+      "vegetation": {
+        "trees": [
+          {
+            "type": "SPRUCE",
+            "density": 10,
+            "size": 1.0
+          }
+        ],
+        "ground": [
+          {
+            "type": "GRASS_SHORT",
+            "density": 30
+          },
+          {
+            "type": "BOULDER",
+            "density": 14
+          }
+        ],
+        "surface": [
+          {
+            "block": "STONE",
+            "pct": 50
+          },
+          {
+            "block": "GRASS_BLOCK",
+            "pct": 35
+          },
+          {
+            "block": "GRAVEL",
+            "pct": 15
+          }
+        ]
+      },
+      "ridge": 0.75
+    },
+    {
+      "id": 9,
+      "name": "mountain",
+      "rgb": [
+        186,
+        188,
+        186
+      ],
+      "biome": "JAGGED_PEAKS",
+      "base_height": 148,
+      "relief": 78,
+      "water": false,
+      "vegetation": {
+        "trees": [
+          {
+            "type": "SPRUCE",
+            "density": 3,
+            "size": 0.8
+          }
+        ],
+        "ground": [
+          {
+            "type": "SNOW_LAYER",
+            "density": 60
+          },
+          {
+            "type": "BOULDER",
+            "density": 18
+          }
+        ],
+        "surface": [
+          {
+            "block": "STONE",
+            "pct": 55
+          },
+          {
+            "block": "SNOW_BLOCK",
+            "pct": 30
+          },
+          {
+            "block": "GRAVEL",
+            "pct": 15
+          }
+        ]
+      },
+      "ridge": 1.0
+    },
+    {
+      "id": 10,
+      "name": "steppe",
+      "rgb": [
+        166,
+        124,
+        84
+      ],
+      "biome": "SAVANNA",
+      "base_height": 82,
+      "relief": 20,
+      "water": false,
+      "vegetation": {
+        "trees": [
+          {
+            "type": "ACACIA_SPREAD",
+            "density": 16,
+            "size": 1.5
+          }
+        ],
+        "ground": [
+          {
+            "type": "GRASS_TALL_DRY",
+            "density": 60
+          },
+          {
+            "type": "DEAD_BUSH",
+            "density": 12
+          }
+        ],
+        "surface": [
+          {
+            "block": "GRASS_BLOCK",
+            "pct": 45
+          },
+          {
+            "block": "COARSE_DIRT",
+            "pct": 35
+          },
+          {
+            "block": "SAND",
+            "pct": 20
+          }
+        ]
+      }
+    },
+    {
+      "id": 11,
+      "name": "dothraki_sea",
+      "rgb": [
+        226,
+        126,
+        44
+      ],
+      "biome": "SAVANNA_PLATEAU",
+      "base_height": 84,
+      "relief": 12,
+      "water": false,
+      "vegetation": {
+        "trees": [
+          {
+            "type": "ACACIA_SPREAD",
+            "density": 22,
+            "size": 1.8
+          },
+          {
+            "type": "BAOBAB",
+            "density": 5,
+            "size": 2.2
+          }
+        ],
+        "ground": [
+          {
+            "type": "GRASS_TALL_DRY",
+            "density": 88
+          },
+          {
+            "type": "GRASS_SHORT",
+            "density": 40
+          }
+        ],
+        "surface": [
+          {
+            "block": "GRASS_BLOCK",
+            "pct": 60
+          },
+          {
+            "block": "COARSE_DIRT",
+            "pct": 25
+          },
+          {
+            "block": "TERRACOTTA_ORANGE",
+            "pct": 15
+          }
+        ]
+      }
+    },
+    {
+      "id": 12,
+      "name": "desert",
+      "rgb": [
+        226,
+        214,
+        176
+      ],
+      "biome": "DESERT",
+      "base_height": 76,
+      "relief": 16,
+      "water": false,
+      "vegetation": {
+        "trees": [
+          {
+            "type": "PALM_TALL",
+            "density": 6,
+            "size": 1.6
+          }
+        ],
+        "ground": [
+          {
+            "type": "CACTUS_TALL",
+            "density": 10
+          },
+          {
+            "type": "DEAD_BUSH",
+            "density": 22
+          },
+          {
+            "type": "GRASS_SHORT_DRY",
+            "density": 12
+          }
+        ],
+        "surface": [
+          {
+            "block": "SAND",
+            "pct": 80
+          },
+          {
+            "block": "SANDSTONE",
+            "pct": 14
+          },
+          {
+            "block": "COARSE_DIRT",
+            "pct": 6
+          }
+        ],
+        "terrace": {
+          "height": 3,
+          "variation": 2
+        }
+      }
+    },
+    {
+      "id": 13,
+      "name": "red_waste",
+      "rgb": [
+        150,
+        92,
+        74
+      ],
+      "biome": "BADLANDS",
+      "base_height": 88,
+      "relief": 34,
+      "water": false,
+      "vegetation": {
+        "trees": [],
+        "ground": [
+          {
+            "type": "CACTUS_TALL",
+            "density": 14
+          },
+          {
+            "type": "DEAD_BUSH",
+            "density": 30
+          }
+        ],
+        "surface": [
+          {
+            "block": "TERRACOTTA_ORANGE",
+            "pct": 55
+          },
+          {
+            "block": "RED_SAND",
+            "pct": 30
+          },
+          {
+            "block": "TERRACOTTA_BROWN",
+            "pct": 15
+          }
+        ],
+        "terrace": {
+          "height": 4,
+          "variation": 3
+        }
+      },
+      "ridge": 0.55
+    },
+    {
+      "id": 14,
+      "name": "jungle",
+      "rgb": [
+        46,
+        140,
+        46
+      ],
+      "biome": "JUNGLE",
+      "base_height": 76,
+      "relief": 18,
+      "water": false,
+      "vegetation": {
+        "trees": [
+          {
+            "type": "MEGA_JUNGLE",
+            "density": 70,
+            "size": 2.4
+          },
+          {
+            "type": "JUNGLE_CANOPY",
+            "density": 30,
+            "size": 1.6
+          }
+        ],
+        "ground": [
+          {
+            "type": "VINES",
+            "density": 60
+          },
+          {
+            "type": "GRASS_TALL",
+            "density": 55
+          },
+          {
+            "type": "BAMBOO",
+            "density": 12
+          },
+          {
+            "type": "MOSS_CARPET",
+            "density": 20
+          }
+        ],
+        "surface": [
+          {
+            "block": "GRASS_BLOCK",
+            "pct": 70
+          },
+          {
+            "block": "MOSS_BLOCK",
+            "pct": 20
+          },
+          {
+            "block": "COARSE_DIRT",
+            "pct": 10
+          }
+        ]
+      }
+    },
+    {
+      "id": 15,
+      "name": "swamp",
+      "rgb": [
+        96,
+        116,
+        74
+      ],
+      "biome": "SWAMP",
+      "base_height": 66,
+      "relief": 5,
+      "water": false,
+      "vegetation": {
+        "trees": [
+          {
+            "type": "MANGROVE",
+            "density": 40,
+            "size": 1.5
+          },
+          {
+            "type": "SWAMP_OAK",
+            "density": 22,
+            "size": 1.3
+          }
+        ],
+        "ground": [
+          {
+            "type": "VINES",
+            "density": 45
+          },
+          {
+            "type": "LILY_PAD",
+            "density": 25
+          },
+          {
+            "type": "GRASS_TALL",
+            "density": 35
+          }
+        ],
+        "surface": [
+          {
+            "block": "MUD",
+            "pct": 45
+          },
+          {
+            "block": "GRASS_BLOCK",
+            "pct": 35
+          },
+          {
+            "block": "CLAY",
+            "pct": 20
+          }
+        ]
+      }
+    },
+    {
+      "id": 16,
+      "name": "volcanic",
+      "rgb": [
+        120,
+        108,
+        118
+      ],
+      "biome": "STONY_PEAKS",
+      "base_height": 140,
+      "relief": 70,
+      "water": false,
+      "vegetation": {
+        "trees": [
+          {
+            "type": "OBSIDIAN_SPIRE",
+            "density": 18,
+            "size": 2.6
+          }
+        ],
+        "ground": [
+          {
+            "type": "DEAD_BUSH",
+            "density": 8
+          },
+          {
+            "type": "BOULDER",
+            "density": 22
+          }
+        ],
+        "surface": [
+          {
+            "block": "BASALT",
+            "pct": 55
+          },
+          {
+            "block": "STONE",
+            "pct": 30
+          },
+          {
+            "block": "GRAVEL",
+            "pct": 15
+          }
+        ]
+      },
+      "ridge": 0.95
+    },
+    {
+      "id": 17,
+      "name": "blighted",
+      "rgb": [
+        70,
+        66,
+        74
+      ],
+      "biome": "STONY_SHORE",
+      "base_height": 92,
+      "relief": 48,
+      "water": false,
+      "ridge": 0.85,
+      "vegetation": {
+        "trees": [
+          {
+            "type": "OBSIDIAN_SPIRE",
+            "density": 34,
+            "size": 3.0
+          },
+          {
+            "type": "DEAD_TREE_TALL",
+            "density": 16,
+            "size": 1.8
+          }
+        ],
+        "ground": [
+          {
+            "type": "DEAD_BUSH",
+            "density": 18
+          },
+          {
+            "type": "MAGMA_VENT",
+            "density": 6
+          },
+          {
+            "type": "BOULDER",
+            "density": 20
+          }
+        ],
+        "surface": [
+          {
+            "block": "DEEPSLATE",
+            "pct": 45
+          },
+          {
+            "block": "BASALT",
+            "pct": 35
+          },
+          {
+            "block": "TUFF",
+            "pct": 20
+          }
+        ]
+      }
+    }
   ]
 }

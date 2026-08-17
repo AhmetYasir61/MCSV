@@ -112,23 +112,100 @@ def box_blur(a: np.ndarray, radius: int) -> np.ndarray:
     return (c[:, k:] - c[:, :-k]) / k
 
 
-def build_height(cls: np.ndarray, palette: list[dict], seed: int, smooth: int) -> np.ndarray:
+def carve_rivers(h: np.ndarray, water: np.ndarray, seed: int, count: int,
+                 width: float, depth: float) -> np.ndarray:
+    """Kivrimli nehir yataklari acar.
+
+    Dusuk frekansli gurultunun sifir gecis seritleri nehir ekseni olarak
+    kullanilir; eksenden uzaklastikca yatak yumusakca yukselir. Referans
+    gorsellerdeki gibi vadiyi takip eden kivrimli dereler cikar.
+    """
+    if count <= 0:
+        return h
+    out = h
+    for i in range(count):
+        n = fbm(h.shape, octaves=3, base_cells=3 + 2 * i, seed=seed + 100 + i)
+        d = np.abs(n - 0.5)                      # 0 = nehir ekseni
+        prof = np.clip(1.0 - d / max(1e-3, width), 0.0, 1.0) ** 2
+        out = out - prof * depth
+    # Nehir yataklari deniz seviyesinin biraz altina insin ama ucurum acmasin.
+    return np.where(water, h, np.maximum(out, 50.0))
+
+
+def build_height(cls: np.ndarray, palette: list[dict], seed: int, smooth: int,
+                 contour: float = 0.0, rivers: int = 3) -> np.ndarray:
     base = np.asarray([c["base_height"] for c in palette], dtype=np.float32)[cls]
     relief = np.asarray([c["relief"] for c in palette], dtype=np.float32)[cls]
+    ridge_w = np.asarray([c.get("ridge", 0.35) for c in palette], dtype=np.float32)[cls]
 
     base = box_blur(base, smooth)
     relief = box_blur(relief, smooth)
+    ridge_w = box_blur(ridge_w, smooth)
 
     shape = cls.shape
     detail = fbm(shape, octaves=5, base_cells=8, seed=seed) - 0.5
-    ridges = 1.0 - np.abs(fbm(shape, octaves=4, base_cells=24, seed=seed + 1) - 0.5) * 2.0
+    # Sirt (ridge) gurultusu: mutlak deger keskin tepe hatlari uretir; agirligi
+    # yuksek olan siniflarda (dag, yayla, Duvar) referans gorsellerdeki gibi
+    # sivri, asinmis zirveler cikar.
+    ridges = 1.0 - np.abs(fbm(shape, octaves=5, base_cells=20, seed=seed + 1) - 0.5) * 2.0
+    ridges = ridges ** 2
 
-    h = base + relief * (detail * 1.4 + (ridges - 0.5) * 0.8)
+    h = base + relief * (detail * (1.4 - ridge_w) + (ridges - 0.4) * (0.6 + 2.0 * ridge_w))
+
+    # Badlands / col basamaklari: bu siniflarda yukseklik kademelendirilir,
+    # boylece asinmis teras gorunumu olusur (kirmizi corak, Dorne).
+    for c in palette:
+        terrace = (c.get("vegetation") or {}).get("terrace")
+        if not terrace:
+            continue
+        step = float(terrace["height"])
+        var = float(terrace.get("variation", 0))
+        m = cls == c["id"]
+        if not m.any():
+            continue
+        jitter = (fbm(shape, octaves=3, base_cells=12, seed=seed + 7 + c["id"]) - 0.5) * var
+        h = np.where(m, np.round((h + jitter) / step) * step, h)
+
+    water = np.asarray([c["water"] for c in palette], dtype=bool)[cls]
+
+    # Nehirler: karada kivrimli vadiler.
+    h = carve_rivers(h, water, seed, rivers, width=0.012, depth=14.0)
+
+    # Kontur basamaklari: referans gorsellerdeki gibi yamaclarin es yukselti
+    # cizgileri boyunca kademelenmesi. 0 = kapali.
+    if contour > 0:
+        stepped = np.round(h / contour) * contour
+        h = np.where(water, h, stepped)
 
     # Su piksellerini deniz seviyesinin (63) altinda tut, karayi ustunde.
-    water = np.asarray([c["water"] for c in palette], dtype=bool)[cls]
     h = np.where(water, np.minimum(h, 61.0), np.maximum(h, 64.0))
     return np.clip(h, MC_MIN_Y, MC_MAX_Y)
+
+
+def build_layer_masks(cls: np.ndarray, palette: list[dict], seed: int) -> dict[str, np.ndarray]:
+    """Her vejetasyon/dekor katmani icin 0-255 yogunluk maskesi uretir.
+
+    Yogunluk sabit degil: dusuk frekansli 'obeklenme' gurultusuyle carpilir,
+    boylece agaclar duz serpistirme yerine koru/aciklik deseni olusturur.
+    """
+    layers: dict[str, np.ndarray] = {}
+    spec: dict[str, np.ndarray] = {}
+
+    for c in palette:
+        veg = c.get("vegetation") or {}
+        for entry in list(veg.get("trees", [])) + list(veg.get("ground", [])):
+            name = entry["type"]
+            arr = spec.setdefault(name, np.zeros(len(palette), dtype=np.float32))
+            arr[c["id"]] = float(entry.get("density", 0))
+
+    for i, (name, dens_by_cls) in enumerate(sorted(spec.items())):
+        dens = dens_by_cls[cls]
+        if not dens.any():
+            continue
+        clump = fbm(cls.shape, octaves=3, base_cells=10, seed=seed + 200 + i)
+        m = dens * (0.35 + 1.3 * clump)
+        layers[name] = np.clip(m * 2.55, 0, 255).astype(np.uint8)
+    return layers
 
 
 def to_uint16(h: np.ndarray) -> np.ndarray:
@@ -151,6 +228,11 @@ def main() -> int:
     p.add_argument("--palette", type=Path, default=DEFAULT_PALETTE)
     p.add_argument("--max-pixels", type=int, default=0,
                    help="kaynagi bu kenar uzunluguna kucult (0 = kucultme)")
+    p.add_argument("--contour", type=float, default=3.0,
+                   help="yamac kademe yuksekligi, blok (0 = duz yamac)")
+    p.add_argument("--rivers", type=int, default=3, help="acilacak nehir agi sayisi")
+    p.add_argument("--no-layers", action="store_true",
+                   help="vejetasyon/dekor maskelerini uretme")
     args = p.parse_args()
 
     palette = load_palette(args.palette)
@@ -164,7 +246,11 @@ def main() -> int:
     print(f"kaynak: {img.width}x{img.height} piksel")
 
     cls = classify(rgb, palette)
-    height = build_height(cls, palette, args.seed, args.smooth)
+    height = build_height(cls, palette, args.seed, args.smooth,
+                          contour=args.contour, rivers=args.rivers)
+    layers = {} if args.no_layers else build_layer_masks(cls, palette, args.seed)
+    if layers:
+        print(f"vejetasyon/dekor katmani: {len(layers)} adet")
 
     # Kaynak pikselinden bloga: her piksel `scale` bloga acilir. Cok buyuk
     # olceklerde ara adim kullanip belleği korumak icin karo karo uretiyoruz.
@@ -176,6 +262,11 @@ def main() -> int:
     bdir = args.out / "biome"
     hdir.mkdir(parents=True, exist_ok=True)
     bdir.mkdir(parents=True, exist_ok=True)
+    ldirs = {}
+    for lname in layers:
+        d = args.out / "layers" / lname
+        d.mkdir(parents=True, exist_ok=True)
+        ldirs[lname] = d
 
     manifest = {
         "scale_blocks_per_pixel": args.scale,
@@ -185,8 +276,10 @@ def main() -> int:
         "min_y": MC_MIN_Y,
         "max_y": MC_MAX_Y,
         "sea_level": 63,
-        "classes": [{"id": c["id"], "name": c["name"], "biome": c["biome"], "water": c["water"]}
+        "classes": [{"id": c["id"], "name": c["name"], "biome": c["biome"], "water": c["water"],
+                     "vegetation": c.get("vegetation", {})}
                     for c in palette],
+        "layers": sorted(layers),
         "tiles": [],
     }
 
@@ -200,6 +293,11 @@ def main() -> int:
             name = f"tile_{tx}_{tz}.png"
             Image.fromarray(h_tile).save(hdir / name, optimize=True)
             Image.fromarray(c_tile, mode="L").save(bdir / name, optimize=True)
+            for lname, mask in layers.items():
+                m_tile = resize_nearest(mask[y0:y1, x0:x1], args.scale)
+                if not m_tile.any():
+                    continue  # bos maskeyi yazma, karo sayisi sisiyor
+                Image.fromarray(m_tile, mode="L").save(ldirs[lname] / name, optimize=True)
             manifest["tiles"].append({
                 "file": name,
                 "origin_x": x0 * args.scale,

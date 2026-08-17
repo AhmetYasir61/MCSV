@@ -81,3 +81,49 @@ build/, out/               üretilen çıktı (git'e girmez)
 Araçlar bu deponun kendi kodudur. Kaynak harita ve "Game of Thrones / A Song of
 Ice and Fire" isimleri ilgili hak sahiplerine aittir; üretilen dünyayı ticari
 olarak dağıtmayın.
+
+## Bitkilendirme ve arazi karakteri
+
+Amaç düz vanilla ağaç serpiştirmesi değil; referans görsellerdeki gibi karaktere
+sahip biome'lar:
+
+- **Dev ağaçlar** — mega ladin (Kuzey), mega meşe / kara meşe (Kingswood, Kurtormanı),
+  dev jungle kanopisi ve mangrov (Yaz Adaları, Sothoryos), akasya/baobab (Dothraki Denizi),
+  palmiye (Dorne). Hepsi `objects/` altındaki .schematic setlerinden yerleştirilir.
+- **Öbeklenme** — her katmanın yoğunluğu düşük frekanslı gürültüyle çarpılır,
+  böylece koru–açıklık deseni oluşur, homojen orman olmaz.
+- **Yer örtüsü** — uzun/kuru ot, eğrelti, sarmaşık, bambu, nilüfer, kaktüs, ölü çalı,
+  yosun halısı, kar tabakası; ayrıca kaya blokları ve devrik kütükler.
+- **Arazi** — sınıf başına `ridge` ağırlığı (dağ 1.0, yayla 0.75, Valyria 0.85) keskin
+  sivri zirveler üretir; `--contour` yamaçları eş yükselti basamaklarına böler;
+  `--rivers` kıvrımlı nehir vadileri açar; badlands/çöl için basamaklı aşınma.
+- **Valyria / Gölge Diyarı** — obsidyen kuleler, ölü ağaçlar, magma bacaları ve
+  deepslate/bazalt yüzeyli `blighted` sınıfı.
+
+Katman adlarının WorldPainter karşılıkları `worldpainter/layer_map.json` içindedir.
+
+## Haritayı indirmeden görmek
+
+```bash
+python3 tools/make_preview.py build/ --out preview/index.html
+```
+
+Tek dosyalık, dış kaynak çağırmayan bir web görüntüleyici üretir: kaydır/yakınlaştır,
+imleç altındaki blok koordinatı ve arazi sınıfı okuması, hillshade rölyef, efsane.
+Sunucuda gerçek 3B gezinti için BlueMap/Dynmap kurulumu: [docs/VIEWER.md](docs/VIEWER.md).
+
+## İndirme / Release
+
+`v*` etiketi atıldığında `.github/workflows/release.yml` karoları ve önizlemeyi
+üretip Release'e yükler:
+
+```bash
+git tag v0.1.0 && git push origin v0.1.0
+```
+
+Tam Minecraft dünyası (region dosyaları) CI'da üretilemez — WorldPainter masaüstü
+adımı ve yüzlerce GB çıktı gerekir. Yerelde üretip aynı release'e eklersiniz:
+
+```bash
+gh release upload v0.1.0 GoT-World.zip
+```

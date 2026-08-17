@@ -10,6 +10,12 @@
  *
  * Not: WorldPainter'a bol bellek verin, ornegin
  *   JAVA_OPTS="-Xmx24G" wpscript ...
+ *
+ * DIKKAT: WorldPainter Scripting API'si surumden surume degisir (ozellikle
+ * katman/custom-object cagrilari). Bu betik kurulu surumunuzun API'siyle
+ * dogrulanmadi; calistirmadan once `wpscript --help` ciktisina ve resmi
+ * Scripting API dokumanina bakip applyLayer/withObjects cagrilarini kendi
+ * surumunuze uyarlayin. Heightmap ice aktarma kismi standart ve stabildir.
  */
 
 var manifestPath = arguments[0];
@@ -60,6 +66,41 @@ wp.applyHeightMap(world)
 for (var c = 0; c < manifest.classes.length; c++) {
     var cls = manifest.classes[c];
     print('terrain: ' + cls.name + ' -> ' + TERRAIN[cls.id]);
+}
+
+// --- Vejetasyon / dekor katmanlari -----------------------------------------
+// mapgen.py her katman icin 0-255 yogunluk maskesi uretti. Bunlari WorldPainter
+// katmanlarinin yogunluk haritasi olarak yukluyoruz; boylece agaclar duz
+// serpistirme yerine obekli koru/aciklik deseni olusturuyor.
+// layer_map.json yolu: 3. argumanla verilebilir, yoksa worldpainter/ altinda aranir.
+var layerMapFile = new java.io.File(arguments[2] || 'worldpainter/layer_map.json');
+var layerMap = JSON.parse(new java.lang.String(
+    java.nio.file.Files.readAllBytes(layerMapFile.toPath()), 'UTF-8')).layers;
+
+var layerNames = manifest.layers || [];
+for (var li = 0; li < layerNames.length; li++) {
+    var lname = layerNames[li];
+    var def = layerMap[lname];
+    if (!def) {
+        print('UYARI: layer_map.json icinde tanimsiz katman, atlandi: ' + lname);
+        continue;
+    }
+    var layerDir = new java.io.File(new java.io.File(baseDir, 'layers'), lname);
+    if (!layerDir.isDirectory()) { continue; }
+
+    for (var ti = 0; ti < manifest.tiles.length; ti++) {
+        var tile = manifest.tiles[ti];
+        var maskFile = new java.io.File(layerDir, tile.file);
+        if (!maskFile.isFile()) { continue; }   // bu karoda bu katman yok
+
+        wp.applyLayer(world)
+          .fromMaskFile(maskFile)
+          .shift(tile.origin_x, tile.origin_z)
+          .toLayer(def.wp_layer)
+          .withObjects(def.kind === 'object' ? def.objects : null)
+          .go();
+    }
+    print('katman uygulandi: ' + lname + ' (' + def.kind + ' -> ' + def.wp_layer + ')');
 }
 
 wp.saveWorld(world).toFile(outDir + '.world').go();

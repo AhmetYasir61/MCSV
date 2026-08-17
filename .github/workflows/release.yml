@@ -1,0 +1,71 @@
+name: Harita paketi ve release
+
+# v* etiketi atildiginda: kaynak haritadan heightmap/biome karolarini ve tek
+# dosya web onizlemesini uretir, zip'leyip Release'e yukler.
+#
+# Not: Tam Minecraft dunyasi (region dosyalari) burada uretilmez — WorldPainter
+# masaustu adimi ve on-yuzlerce GB cikti gerektirir (bkz. docs/SCALE.md).
+# Onu yerelde uretip `gh release upload <tag> GoT-World.zip` ile ayni release'e
+# eklersiniz; workflow release'i zaten acmis olur.
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      scale:
+        description: "1 kaynak piksel = kac blok"
+        default: "16"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - run: pip install -r requirements.txt
+
+      - name: Kaynak harita var mi?
+        id: src
+        run: |
+          if ls source/*.png >/dev/null 2>&1; then
+            echo "file=$(ls source/*.png | head -1)" >> "$GITHUB_OUTPUT"
+          else
+            echo "source/ altinda PNG yok; harita paketi uretilemez." >&2
+            exit 1
+          fi
+
+      - name: Karolari uret
+        run: |
+          python3 tools/mapgen.py "${{ steps.src.outputs.file }}" \
+            --out build/ --scale "${{ inputs.scale || '16' }}"
+
+      - name: Web onizlemesini uret
+        run: python3 tools/make_preview.py build/ --out preview/index.html
+
+      - name: Paketle
+        run: |
+          zip -qr westeros-tiles.zip build/
+          cp preview/index.html westeros-preview.html
+          ls -lh westeros-tiles.zip westeros-preview.html
+
+      - name: Release'e yukle
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            westeros-tiles.zip
+            westeros-preview.html
+          body: |
+            Westeros & Essos harita paketi.
+
+            - `westeros-tiles.zip` — heightmap + biome + vejetasyon maskeleri (WorldPainter girdisi)
+            - `westeros-preview.html` — tarayicida acilan, indirmesiz gezilebilir onizleme
+
+            Tam Minecraft dunyasi ayri bir varlik olarak eklenir; boyut icin docs/SCALE.md.
