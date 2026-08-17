@@ -57,6 +57,35 @@ ve headless ayarını kendisi verir:
 Yolu biliyorsan: `WPSCRIPT=/opt/worldpainter/wpscript ./scripts/wp.sh ...`
 Belleği elle vermek için: `WP_MEMORY_GB=8 ./scripts/wp.sh ...`
 
+## Harita formatı (önemli)
+
+Format verilmezse WorldPainter'ın varsayılanı kullanılır ve bu, 1.18+ yükseklik
+aralığıyla (-64..319) uyumsuz bir biome tablosu taşıyabilir; export sırasında
+şu hatayı verir:
+
+```
+ArrayIndexOutOfBoundsException: Index 23 out of bounds for length 23
+    at org.pepsoft.minecraft.MC118AnvilChunk.setNamedBiome
+```
+
+Çözüm: sunucunun sürümüyle aynı formatı vermek. Kurulu sürümde hangi adların
+geçerli olduğunu görmek için:
+
+```bash
+./scripts/wp.sh worldpainter/probe_formats.js
+```
+
+Format **adla** çözümlenir, kimlikle (`JAVA_ANVIL_*`) değil. Örnek, 1.21.11 sunucu için:
+
+```bash
+./scripts/wp.sh worldpainter/import_tiles.js build/manifest.json out/GoT-World \
+  worldpainter/layer_map.json "Minecraft 1.21.11"
+
+# ya da
+./scripts/build_world.sh --source source/westeros.png --scale 16 \
+  --map-format "Minecraft 1.21.11"
+```
+
 ## Uzun süren üretim
 
 `--scale 16` bile saatler sürebilir; SSH kopunca iş ölmesin diye `screen`/`tmux`
