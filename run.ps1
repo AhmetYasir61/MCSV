@@ -47,13 +47,31 @@ if (-not $Source) {
 }
 Write-Host "Kaynak harita: $Source"
 
-& $py -m pip install --quiet --upgrade pip
-& $py -m pip install --quiet -r requirements.txt
+# Harici komutlarin hatasi $ErrorActionPreference'i tetiklemez; cikis kodunu
+# elle kontrol edip durmak gerekir, yoksa hatadan sonra "Bitti" yazip gecer.
+function Invoke-Step {
+    param([string]$What, [scriptblock]$Body)
+    & $Body
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host ""
+        Write-Host "$What basarisiz (cikis kodu $LASTEXITCODE). Durduruldu." -ForegroundColor Red
+        exit $LASTEXITCODE
+    }
+}
 
-& $py tools\mapgen.py $Source --out $Out --scale $Scale --tile $Tile
-& $py tools\make_preview.py $Out --out preview\index.html
+if (-not (Test-Path $Source)) {
+    Write-Host "Kaynak harita bulunamadi: $Source" -ForegroundColor Red
+    Write-Host "Renkli dunya haritasi PNG'sini source\westeros.png olarak koyun."
+    exit 1
+}
+
+Invoke-Step "pip kurulumu" { & $py -m pip install --quiet --upgrade pip }
+Invoke-Step "bagimlilik kurulumu" { & $py -m pip install --quiet -r requirements.txt }
+Invoke-Step "karo uretimi" { & $py tools\mapgen.py $Source --out $Out --scale $Scale --tile $Tile }
+Invoke-Step "onizleme uretimi" { & $py tools\make_preview.py $Out --out preview\index.html }
 
 Write-Host ""
 Write-Host "Bitti." -ForegroundColor Green
 Write-Host "  Karolar   : $Out\height, $Out\biome, $Out\layers"
+Write-Host "  WorldPainter girdisi: $Out\full\height.png (+ full\layers)"
 Write-Host "  Onizleme  : preview\index.html  (cift tiklayip tarayicida acin)"
