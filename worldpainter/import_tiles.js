@@ -92,7 +92,11 @@ var builder = wp.createWorld()
     .toLevels(minY, maxY)
     .scale(scalePct)
     .withLowerBuildLimit(minY)
-    .withUpperBuildLimit(maxY)
+    // Ust sinir DISLAYICI: 1.18 dunyasi -64..319 icin limit 320 olmali.
+    // maxY (319) verilirse dunya (319+64)/16 = 23 bolum olarak kurulur, ama
+    // biome y=319'a yazilir ve index 23 tabloyu tasirir:
+    //   ArrayIndexOutOfBoundsException: Index 23 out of bounds for length 23
+    .withUpperBuildLimit(maxY + 1)
     .withWaterLevel(seaLevel);
 
 if (mapFormat) {
