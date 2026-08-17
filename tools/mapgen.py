@@ -258,6 +258,17 @@ def main() -> int:
     tiles_x = math.ceil(img.width / ppt)
     tiles_z = math.ceil(img.height / ppt)
 
+    # Tam cozunurluklu (kaynak piksel = 1 px) tek parca ciktilar. WorldPainter
+    # bunlari scale() ile yuzde olarak buyuterek dunyayi olusturur; boylece
+    # devasa karo PNG'lerini birlestirmeye gerek kalmaz.
+    fdir = args.out / "full"
+    (fdir / "layers").mkdir(parents=True, exist_ok=True)
+    Image.fromarray(to_uint16(height)).save(fdir / "height.png", optimize=True)
+    Image.fromarray(cls, mode="L").save(fdir / "biome.png", optimize=True)
+    for lname, mask in layers.items():
+        Image.fromarray(mask, mode="L").save(fdir / "layers" / f"{lname}.png", optimize=True)
+    print(f"tam cozunurluk: {fdir} (WorldPainter icin, scale %{args.scale * 100})")
+
     hdir = args.out / "height"
     bdir = args.out / "biome"
     hdir.mkdir(parents=True, exist_ok=True)
@@ -276,6 +287,14 @@ def main() -> int:
         "min_y": MC_MIN_Y,
         "max_y": MC_MAX_Y,
         "sea_level": 63,
+        "full": {
+            "height": "full/height.png",
+            "biome": "full/biome.png",
+            "layers_dir": "full/layers",
+            "scale_percent": args.scale * 100,
+            "source_width": img.width,
+            "source_height": img.height,
+        },
         "classes": [{"id": c["id"], "name": c["name"], "biome": c["biome"], "water": c["water"],
                      "vegetation": c.get("vegetation", {})}
                     for c in palette],
