@@ -145,3 +145,32 @@ git clone https://github.com/<kullanıcı>/westeros-world-maps.git
 # ya da sadece paket:
 gh release download v0.1.0 --repo <kullanıcı>/westeros-world-maps
 ```
+
+## Windows'ta çalıştırma
+
+Windows'ta `python3` diye bir komut yoktur; `python3 ...` yazınca Microsoft Store
+kısayolu devreye girer ve "Python was not found" hatası alırsınız. Doğru komut
+`python` ya da `py`. En kolayı hazır başlatıcı:
+
+```powershell
+.\run.ps1                                  # source\ altındaki ilk PNG, ölçek 32
+.\run.ps1 -Source source\westeros.png -Scale 16
+```
+
+Betik Python 3'ü bulur, bağımlılıkları kurar, karoları ve `preview\index.html`
+önizlemesini üretir. Eğer "betik çalıştırma engellendi" derse:
+
+```powershell
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+```
+
+Elle çalıştırmak isterseniz:
+
+```powershell
+py -m pip install -r requirements.txt
+py tools\mapgen.py source\westeros.png --out build --scale 32
+py tools\make_preview.py build --out preview\index.html
+```
+
+Python kurulu değilse: https://www.python.org/downloads/windows/ — kurulumda
+**"Add python.exe to PATH"** kutusunu işaretleyin ve sonra PowerShell'i yeniden açın.
