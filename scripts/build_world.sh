@@ -19,6 +19,7 @@ WPSCRIPT=""
 DEPLOY_UUID=""
 LEVEL_NAME="world"
 PREVIEW=1
+MAP_FORMAT="${MAP_FORMAT:-}"
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -31,6 +32,7 @@ while [[ $# -gt 0 ]]; do
         --deploy-uuid) DEPLOY_UUID="$2"; shift 2 ;;
         --level-name)  LEVEL_NAME="$2"; shift 2 ;;
         --no-preview)  PREVIEW=0; shift ;;
+        --map-format)  MAP_FORMAT="$2"; shift 2 ;;
         -h|--help)     sed -n '2,10p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
         *) echo "bilinmeyen secenek: $1" >&2; exit 1 ;;
     esac
@@ -78,7 +80,8 @@ echo "==> 2/3 WorldPainter dunyasi"
 # Basssiz sunucuda AWT ekran aramasin diye headless zorunlu.
 export JAVA_OPTS="-Xmx${MEMORY_GB}G -Djava.awt.headless=true"
 "$WPSCRIPT" "$REPO_DIR/worldpainter/import_tiles.js" \
-    "$BUILD_DIR/manifest.json" "$OUT_WORLD" "$REPO_DIR/worldpainter/layer_map.json"
+    "$BUILD_DIR/manifest.json" "$OUT_WORLD" "$REPO_DIR/worldpainter/layer_map.json" \
+    ${MAP_FORMAT:+"$MAP_FORMAT"}
 
 if [[ -n "$DEPLOY_UUID" ]]; then
     echo "==> 3/3 Pelican sunucusuna kurulum"

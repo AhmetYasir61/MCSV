@@ -24,6 +24,10 @@
 var manifestPath = arguments[0];
 var outDir = arguments[1] || 'out/GoT-World';
 var layerMapPath = arguments[2] || 'worldpainter/layer_map.json';
+// 4. arguman: harita formati (ornek "JAVA_ANVIL_1_19" ya da "Minecraft 1.21").
+// Verilmezse WorldPainter'in varsayilani kullanilir; varsayilan eski bir biome
+// semasi tasiyorsa export sirasinda setNamedBiome hatasi alinir.
+var mapFormatSpec = arguments[3] || null;
 
 function readJson(path) {
     return JSON.parse(new java.lang.String(
@@ -62,15 +66,29 @@ var heightMap = wp.getHeightMap()
     .fromFile(heightFile.getAbsolutePath())
     .go();
 
-var world = wp.createWorld()
+var mapFormat = null;
+if (mapFormatSpec) {
+    try {
+        mapFormat = wp.getMapFormat().withId(mapFormatSpec).go();
+    } catch (eFmt) {
+        mapFormat = wp.getMapFormat().withName(mapFormatSpec).go();
+    }
+    print('Harita formati: ' + mapFormatSpec);
+}
+
+var builder = wp.createWorld()
     .fromHeightMap(heightMap)
     .fromLevels(0, 65535)          // mapgen 16-bit yazar
     .toLevels(minY, maxY)
     .scale(scalePct)
     .withLowerBuildLimit(minY)
     .withUpperBuildLimit(maxY)
-    .withWaterLevel(seaLevel)
-    .go();
+    .withWaterLevel(seaLevel);
+
+if (mapFormat) {
+    builder = builder.withMapFormat(mapFormat);
+}
+var world = builder.go();
 
 print('Dunya olusturuldu.');
 
