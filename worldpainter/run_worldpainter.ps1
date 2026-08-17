@@ -4,6 +4,9 @@
 #   .\worldpainter\run_worldpainter.ps1 -Manifest build\manifest.json -Out out\GoT-World -MemoryGB 24
 #   .\worldpainter\run_worldpainter.ps1 -Doctor        # sadece ne bulundugunu yazar
 #
+# Kurulum baska bir surucude ise (ornek E:\WorldPainter) betik onu kendisi bulur;
+# bulamazsa -InstallDir ile yolu verin.
+#
 # Neden bu betik:
 #   1) PowerShell'de `JAVA_OPTS="-Xmx24G" wpscript ...` yazimi gecersizdir
 #      (bu bash sozdizimi); ortam degiskeni $env: ile ayrica verilir.
@@ -22,14 +25,33 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-$roots = @(
+# Aday klasorler: bilinen kurulum yerleri + TUM sabit surucularin kokunde ve
+# Program Files altinda WorldPainter arama (kurulum E:\WorldPainter gibi baska
+# bir surucude olabilir).
+$candidates = [System.Collections.Generic.List[string]]::new()
+foreach ($c in @(
     "$env:ProgramFiles\WorldPainter",
     "${env:ProgramFiles(x86)}\WorldPainter",
     "$env:LOCALAPPDATA\Programs\WorldPainter",
     "$env:LOCALAPPDATA\WorldPainter",
-    "$env:USERPROFILE\WorldPainter",
-    "C:\WorldPainter"
-) | Where-Object { $_ -and (Test-Path $_) }
+    "$env:USERPROFILE\WorldPainter"
+)) { if ($c) { $candidates.Add($c) } }
+
+$drives = Get-PSDrive -PSProvider FileSystem -ErrorAction SilentlyContinue |
+          Where-Object { $_.Root -match '^[A-Za-z]:\\$' }
+foreach ($d in $drives) {
+    $r = $d.Root
+    foreach ($sub in @("WorldPainter", "Worldpainter", "worldpainter",
+                       "Program Files\WorldPainter", "Program Files (x86)\WorldPainter",
+                       "Games\WorldPainter", "Tools\WorldPainter")) {
+        $candidates.Add((Join-Path $r $sub))
+    }
+}
+
+# Buyuk/kucuk harf Windows'ta onemsiz; ayni yol iki kez taranmasin.
+$roots = $candidates | Where-Object { $_ -and (Test-Path $_) } |
+         ForEach-Object { (Resolve-Path $_).Path } |
+         Select-Object -Unique
 
 function Find-WpScript {
     # 1) PATH
