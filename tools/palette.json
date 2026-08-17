@@ -1,0 +1,22 @@
+{
+  "_comment": "Kaynak dunya haritasindaki renkler -> arazi sinifi. RGB degerleri en yakin komsu ile eslesir.",
+  "classes": [
+    { "id": 0,  "name": "ocean",            "rgb": [42, 63, 115],  "biome": "OCEAN",              "base_height": 24,  "relief": 4,  "water": true },
+    { "id": 1,  "name": "shallow_sea",      "rgb": [70, 100, 160], "biome": "LUKEWARM_OCEAN",     "base_height": 44,  "relief": 3,  "water": true },
+    { "id": 2,  "name": "ice_north",        "rgb": [236, 240, 245],"biome": "SNOWY_TAIGA",        "base_height": 78,  "relief": 26, "water": false },
+    { "id": 3,  "name": "tundra",           "rgb": [196, 208, 200],"biome": "SNOWY_PLAINS",       "base_height": 74,  "relief": 14, "water": false },
+    { "id": 4,  "name": "boreal_forest",    "rgb": [61, 84, 48],   "biome": "TAIGA",              "base_height": 80,  "relief": 22, "water": false },
+    { "id": 5,  "name": "temperate_forest", "rgb": [86, 122, 62],  "biome": "FOREST",             "base_height": 78,  "relief": 18, "water": false },
+    { "id": 6,  "name": "deep_forest",      "rgb": [52, 74, 40],   "biome": "DARK_FOREST",        "base_height": 80,  "relief": 20, "water": false },
+    { "id": 7,  "name": "grassland",        "rgb": [122, 158, 88], "biome": "PLAINS",             "base_height": 72,  "relief": 10, "water": false },
+    { "id": 8,  "name": "highland",         "rgb": [150, 152, 148],"biome": "WINDSWEPT_HILLS",    "base_height": 108, "relief": 46, "water": false },
+    { "id": 9,  "name": "mountain",         "rgb": [186, 188, 186],"biome": "JAGGED_PEAKS",       "base_height": 148, "relief": 78, "water": false },
+    { "id": 10, "name": "steppe",           "rgb": [166, 124, 84], "biome": "SAVANNA",            "base_height": 82,  "relief": 20, "water": false },
+    { "id": 11, "name": "dothraki_sea",     "rgb": [226, 126, 44], "biome": "SAVANNA_PLATEAU",    "base_height": 84,  "relief": 12, "water": false },
+    { "id": 12, "name": "desert",           "rgb": [226, 214, 176],"biome": "DESERT",             "base_height": 76,  "relief": 16, "water": false },
+    { "id": 13, "name": "red_waste",        "rgb": [150, 92, 74],  "biome": "BADLANDS",           "base_height": 88,  "relief": 34, "water": false },
+    { "id": 14, "name": "jungle",           "rgb": [46, 140, 46],  "biome": "JUNGLE",             "base_height": 76,  "relief": 18, "water": false },
+    { "id": 15, "name": "swamp",            "rgb": [96, 116, 74],  "biome": "SWAMP",              "base_height": 66,  "relief": 5,  "water": false },
+    { "id": 16, "name": "volcanic",         "rgb": [120, 108, 118],"biome": "STONY_PEAKS",        "base_height": 140, "relief": 70, "water": false }
+  ]
+}

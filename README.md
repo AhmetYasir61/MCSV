@@ -1,4 +1,83 @@
-# vps_scripts
-Scripts I use to manage Nginx on my Vultr VPS. This is designed to work with the One-Click LEMP application setup: https://www.vultr.com/docs/one-click-lemp
+# World Maps — Game of Thrones haritası için Minecraft dünya üreteci
 
-It includes scripts for the VIM setup I use, as well as managing website deployment via Nginx. I have not included anything for implementing security. This is designed to manage functionality alone.
+Renkli bir dünya haritası PNG'sini (Westeros + Essos) **terrain-only** bir
+Minecraft dünyasına çeviren araç zinciri. Depo dünyanın kendisini değil,
+dünyayı istediğiniz ölçekte üreten tarifi içerir.
+
+> **Önce şunu okuyun: [docs/SCALE.md](docs/SCALE.md).**
+> İstenen 1.000.000 x 1.000.000 blokluk dünya üretilebilir ama saklanamaz:
+> ~3,9 milyar chunk, iyimser tahminle 19 TB, tipik olarak ~78 TB disk ve tek
+> makinede ~45 gün üretim demek. GitHub'ın dosya başına sınırı 100 MB, depo
+> önerisi birkaç GB — yani dünya dosyası hiçbir koşulda buraya konulamaz.
+> Bu yüzden ölçek `--scale` ile parametrik; 16–64 aralığı gerçekçi "1:1 hissi"
+> veren aralıktır (WesterosCraft ~60.000 x 40.000 blok mertebesindedir).
+
+## Kurulum
+
+```bash
+pip install -r requirements.txt
+```
+
+Ek olarak dünya dışa aktarımı için [WorldPainter](https://www.worldpainter.net/)
+(ve komut satırı aracı `wpscript`) gerekir.
+
+## Kullanım
+
+1. Renkli kaynak haritanızı `source/westeros.png` olarak koyun.
+2. Yükseklik ve biome karolarını üretin:
+
+```bash
+python3 tools/mapgen.py source/westeros.png --out build/ --scale 16
+```
+
+3. WorldPainter ile dünyayı oluşturup dışa aktarın:
+
+```bash
+JAVA_OPTS="-Xmx24G" wpscript worldpainter/import_tiles.js build/manifest.json out/GoT-World
+```
+
+### `mapgen.py` seçenekleri
+
+| Seçenek | Anlamı |
+|---|---|
+| `--scale N` | 1 kaynak piksel = N blok (varsayılan 64) |
+| `--tile N` | Çıktı karosunun blok cinsinden kenarı (varsayılan 4096) |
+| `--seed N` | Arazi gürültüsü tohumu — aynı tohum aynı araziyi verir |
+| `--smooth N` | Sınıf haritası yumuşatma yarıçapı (kıyı geçişleri) |
+| `--max-pixels N` | Kaynağı önce bu kenar uzunluğuna küçült |
+| `--palette P` | Alternatif renk paleti dosyası |
+
+## Nasıl çalışıyor?
+
+1. **Sınıflandırma** — her kaynak piksel, `tools/palette.json` içindeki en yakın
+   renge atanır (yeşile ağırlık verilmiş RGB mesafesi; orman/çayır tonlarının
+   birbirine karışmasını azaltır). 17 arazi sınıfı var: okyanus, buzul kuzey,
+   iğne yapraklı orman, dağ, Dothraki denizi, çöl, Kızıl Çorak, orman, bataklık...
+2. **Yükseklik** — her sınıfın taban yüksekliği ve rölyefi kutu bulanıklığıyla
+   yumuşatılır, üzerine 5 oktavlı fBm detay gürültüsü ve sırt (ridge) gürültüsü
+   bindirilir. Su pikselleri deniz seviyesinin (63) altında, kara üstünde tutulur.
+3. **Karolama** — sonuç `--scale` katıyla büyütülüp `--tile` boyutunda 16-bit
+   PNG'lere bölünür; `manifest.json` her karonun dünya koordinatını taşır.
+4. **İçe aktarma** — `worldpainter/import_tiles.js` karoları tek tek WorldPainter'a
+   yükleyip birleştirir, deniz seviyesini uygular ve Minecraft dünyası olarak
+   dışa aktarır.
+
+Yükseklik aralığı Minecraft 1.18+ için `-64..319`; heightmap `0..65535` olarak
+yazılır ve içe aktarımda bu aralığa eşlenir.
+
+## Depo yapısı
+
+```
+tools/mapgen.py            harita -> heightmap + biome karoları
+tools/palette.json         renk -> arazi sınıfı / biome / yükseklik tablosu
+worldpainter/import_tiles.js  karoları WorldPainter'a aktarıp dünya üretir
+docs/SCALE.md              ölçek ve depolama hesabı
+source/                    kaynak PNG buraya (git'e girmez)
+build/, out/               üretilen çıktı (git'e girmez)
+```
+
+## Lisans / içerik notu
+
+Araçlar bu deponun kendi kodudur. Kaynak harita ve "Game of Thrones / A Song of
+Ice and Fire" isimleri ilgili hak sahiplerine aittir; üretilen dünyayı ticari
+olarak dağıtmayın.
