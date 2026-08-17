@@ -1,0 +1,3 @@
+# PowerShell betikleri Windows PowerShell 5.1 tarafindan ANSI sanilmasin:
+# UTF-8 BOM ile saklanirlar, satir sonu CRLF olur.
+*.ps1 text eol=crlf working-tree-encoding=UTF-8

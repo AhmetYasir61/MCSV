@@ -1,4 +1,4 @@
-# Windows baslaticisi: Python'u bulur, bagimliliklari kurar, karolari ve
+﻿# Windows baslaticisi: Python'u bulur, bagimliliklari kurar, karolari ve
 # onizlemeyi uretir.
 #
 #   .\run.ps1                          # source/ altindaki ilk PNG, olcek 32

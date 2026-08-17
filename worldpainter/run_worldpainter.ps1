@@ -1,4 +1,4 @@
-# WorldPainter ice aktarma adimini Windows'ta calistirir.
+﻿# WorldPainter ice aktarma adimini Windows'ta calistirir.
 #
 #   .\worldpainter\run_worldpainter.ps1
 #   .\worldpainter\run_worldpainter.ps1 -Manifest build\manifest.json -Out out\GoT-World -MemoryGB 24
@@ -8,7 +8,7 @@
 #   1) PowerShell'de `JAVA_OPTS="-Xmx24G" wpscript ...` yazimi gecersizdir
 #      (bu bash sozdizimi); ortam degiskeni $env: ile ayrica verilir.
 #   2) wpscript her kurulumda PATH'te olmaz. O durumda WorldPainter'in kurulum
-#      klasoru bulunup betik dogrudan Java ile calistirilir — wpscript'in kendisi
+#      klasoru bulunup betik dogrudan Java ile calistirilir - wpscript'in kendisi
 #      de zaten bunu yapan ince bir sarmalayicidir.
 
 param(
@@ -76,7 +76,7 @@ $java = Find-Java
 
 if ($Doctor) {
     Write-Host "Aranan klasorler:"; $roots | ForEach-Object { Write-Host "  $_" }
-    if (-not $roots) { Write-Host "  (hicbiri yok — WorldPainter kurulu gorunmuyor)" -ForegroundColor Yellow }
+    if (-not $roots) { Write-Host "  (hicbiri yok - WorldPainter kurulu gorunmuyor)" -ForegroundColor Yellow }
     Write-Host "wpscript   : $(if ($wp) { $wp } else { 'bulunamadi' })"
     Write-Host "kurulum dizini: $(if ($dir) { $dir } else { 'bulunamadi' })"
     Write-Host "java       : $(if ($java) { $java } else { 'bulunamadi' })"
@@ -93,7 +93,7 @@ $script = Join-Path $PSScriptRoot "import_tiles.js"
 $layerMap = Join-Path $PSScriptRoot "layer_map.json"
 
 # Bellek ayari: bash'teki `JAVA_OPTS=...` on ekinin PowerShell karsiligi.
-$env:JAVA_OPTS = "-Xmx${MemoryGB}G"
+$env:JAVA_OPTS = "-Xmx$($MemoryGB)G"
 
 if ($wp) {
     Write-Host "wpscript: $wp" -ForegroundColor Green
@@ -112,7 +112,7 @@ elseif ($dir -and $java) {
         (Join-Path $dir "app\*"),
         (Join-Path $dir "app\lib\*")
     ) -join ";"
-    & $java "-Xmx${MemoryGB}G" "-cp" $cp `
+    & $java "-Xmx$($MemoryGB)G" "-cp" $cp `
         "org.pepsoft.worldpainter.tools.scripts.ScriptRunner" `
         $script $Manifest $Out $layerMap
     $code = $LASTEXITCODE
