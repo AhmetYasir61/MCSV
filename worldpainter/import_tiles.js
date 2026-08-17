@@ -31,7 +31,9 @@ function readJson(path) {
 }
 
 var manifest = readJson(manifestPath);
-var layerMap = readJson(layerMapPath).layers;
+// mapgen ayni hedefe giden maskeleri birlestirdiyse eslemeyi manifest tasir;
+// boylece 26 yerine 5 uygulama yapilir. Yoksa layer_map.json'a dusuyoruz.
+var layerMap = manifest.layer_targets || readJson(layerMapPath).layers;
 
 var baseDir = new java.io.File(manifestPath).getAbsoluteFile().getParentFile();
 var full = manifest.full;

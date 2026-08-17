@@ -233,6 +233,10 @@ def main() -> int:
     p.add_argument("--rivers", type=int, default=3, help="acilacak nehir agi sayisi")
     p.add_argument("--no-layers", action="store_true",
                    help="vejetasyon/dekor maskelerini uretme")
+    p.add_argument("--layer-map", type=Path, default=HERE.parent / "worldpainter" / "layer_map.json",
+                   help="ayni WorldPainter katmanina giden maskeleri birlestirmek icin")
+    p.add_argument("--no-merge-layers", action="store_true",
+                   help="maskeleri hedef katmana gore birlestirme (her maske ayri kalir)")
     args = p.parse_args()
 
     palette = load_palette(args.palette)
@@ -251,6 +255,35 @@ def main() -> int:
     layers = {} if args.no_layers else build_layer_masks(cls, palette, args.seed)
     if layers:
         print(f"vejetasyon/dekor katmani: {len(layers)} adet")
+
+    # Ayni WorldPainter katmanina giden maskeleri onceden birlestir. WorldPainter
+    # tarafinda her uygulama tum dunyayi olcekleyip tarar; 26 uygulama yerine 5
+    # uygulama hem cok daha hizli hem de bellek dostu.
+    layer_targets = None
+    if layers and not args.no_merge_layers and args.layer_map.is_file():
+        lm = json.loads(args.layer_map.read_text(encoding="utf-8"))["layers"]
+        merged: dict[str, np.ndarray] = {}
+        targets: dict[str, dict] = {}
+        leftover: dict[str, np.ndarray] = {}
+        for name, mask in layers.items():
+            spec = lm.get(name)
+            if not spec or spec.get("kind") != "builtin" or not spec.get("wp_layer"):
+                leftover[name] = mask          # custom object bekleyenler oldugu gibi kalir
+                continue
+            wp_layer = spec["wp_layer"]
+            if wp_layer in merged:
+                merged[wp_layer] = np.maximum(merged[wp_layer], mask)
+            else:
+                merged[wp_layer] = mask.copy()
+                targets[wp_layer] = {"kind": "builtin", "wp_layer": wp_layer}
+            if spec.get("max_level"):
+                targets[wp_layer]["max_level"] = spec["max_level"]
+        for name in leftover:
+            targets[name] = lm.get(name, {"kind": "object", "layer_file": ""})
+        layers = {**merged, **leftover}
+        layer_targets = targets
+        print(f"hedef katmana gore birlestirildi: {len(merged)} hazir katman "
+              f"+ {len(leftover)} custom-object bekleyen")
 
     # Kaynak pikselinden bloga: her piksel `scale` bloga acilir. Cok buyuk
     # olceklerde ara adim kullanip belleği korumak icin karo karo uretiyoruz.
@@ -299,6 +332,7 @@ def main() -> int:
                      "vegetation": c.get("vegetation", {})}
                     for c in palette],
         "layers": sorted(layers),
+        "layer_targets": layer_targets,
         "tiles": [],
     }
 
