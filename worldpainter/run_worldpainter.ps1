@@ -110,13 +110,14 @@ if ($Doctor) {
 # -Probe: kurulu surumun Scripting API'sini listeler (import_tiles.js'i dogru
 # imzalara gore yazmak icin). Manifest gerektirmez.
 if ($Probe) {
-    $probe = Join-Path $PSScriptRoot "probe_api.js"
+    # NOT: degisken adi $Probe olmamali - switch parametresiyle ayni degisken olur.
+    $probeScript = Join-Path $PSScriptRoot "probe_api.js"
     if ($wp) {
-        & $wp $probe
+        & $wp $probeScript
     } elseif ($dir -and $java) {
         $cp = @((Join-Path $dir "*"), (Join-Path $dir "lib\*"),
                 (Join-Path $dir "app\*"), (Join-Path $dir "app\lib\*")) -join ";"
-        & $java "-cp" $cp "org.pepsoft.worldpainter.tools.ScriptingTool" $probe
+        & $java "-cp" $cp "org.pepsoft.worldpainter.tools.ScriptingTool" $probeScript
     } else {
         Write-Host "WorldPainter bulunamadi; -Doctor ile bakin." -ForegroundColor Red
         exit 1
