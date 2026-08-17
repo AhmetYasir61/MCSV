@@ -184,7 +184,12 @@ Bunun yerine:
 .\worldpainter\run_worldpainter.ps1 -Manifest build\manifest.json -Out out\GoT-World -MemoryGB 24
 ```
 
-Betik `wpscript.cmd`'yi PATH'te ve tipik kurulum klasörlerinde arar, `JAVA_OPTS`'u
+Ne bulunduğunu görmek için: `.\worldpainter\run_worldpainter.ps1 -Doctor`
+
+Betik `wpscript`'i PATH'te ve kurulum klasörlerinde özyinelemeli arar; bulamazsa
+WorldPainter'ın kurulum dizinini ve JRE'sini bulup script çalıştırıcısını doğrudan
+Java ile çağırır (wpscript de zaten bunu yapan ince bir sarmalayıcıdır). Yolu elle
+vermek için `-WpScript` veya `-InstallDir` parametreleri var. Ayrıca `wpscript`, `JAVA_OPTS`'u
 `$env:` ile doğru şekilde ayarlar ve `import_tiles.js` + `layer_map.json` yollarını
 kendisi verir. Kurulum yolunu elle vermek gerekirse `-WpScript "C:\Program Files\WorldPainter\wpscript.cmd"`.
 

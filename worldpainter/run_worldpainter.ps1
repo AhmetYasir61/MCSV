@@ -2,18 +2,86 @@
 #
 #   .\worldpainter\run_worldpainter.ps1
 #   .\worldpainter\run_worldpainter.ps1 -Manifest build\manifest.json -Out out\GoT-World -MemoryGB 24
+#   .\worldpainter\run_worldpainter.ps1 -Doctor        # sadece ne bulundugunu yazar
 #
-# Neden bu betik: PowerShell'de `JAVA_OPTS="-Xmx24G" wpscript ...` yazimi
-# gecersizdir (bu bash sozdizimi). Ortam degiskeni ayri olarak $env: ile verilir.
+# Neden bu betik:
+#   1) PowerShell'de `JAVA_OPTS="-Xmx24G" wpscript ...` yazimi gecersizdir
+#      (bu bash sozdizimi); ortam degiskeni $env: ile ayrica verilir.
+#   2) wpscript her kurulumda PATH'te olmaz. O durumda WorldPainter'in kurulum
+#      klasoru bulunup betik dogrudan Java ile calistirilir — wpscript'in kendisi
+#      de zaten bunu yapan ince bir sarmalayicidir.
 
 param(
     [string]$Manifest = "build\manifest.json",
     [string]$Out = "out\GoT-World",
     [int]$MemoryGB = 24,
-    [string]$WpScript = ""
+    [string]$WpScript = "",
+    [string]$InstallDir = "",
+    [switch]$Doctor
 )
 
 $ErrorActionPreference = "Stop"
+
+$roots = @(
+    "$env:ProgramFiles\WorldPainter",
+    "${env:ProgramFiles(x86)}\WorldPainter",
+    "$env:LOCALAPPDATA\Programs\WorldPainter",
+    "$env:LOCALAPPDATA\WorldPainter",
+    "$env:USERPROFILE\WorldPainter",
+    "C:\WorldPainter"
+) | Where-Object { $_ -and (Test-Path $_) }
+
+function Find-WpScript {
+    # 1) PATH
+    foreach ($n in @("wpscript.cmd", "wpscript.bat", "wpscript.exe", "wpscript")) {
+        $c = Get-Command $n -ErrorAction SilentlyContinue
+        if ($c) { return $c.Source }
+    }
+    # 2) Kurulum klasorlerinde ozyinelemeli arama
+    foreach ($r in $roots) {
+        $hit = Get-ChildItem -Path $r -Recurse -Filter "wpscript*" -File -ErrorAction SilentlyContinue |
+               Select-Object -First 1
+        if ($hit) { return $hit.FullName }
+    }
+    return $null
+}
+
+function Find-InstallDir {
+    foreach ($r in $roots) {
+        $exe = Get-ChildItem -Path $r -Recurse -Include "worldpainter.exe", "WorldPainter.exe" -File -ErrorAction SilentlyContinue |
+               Select-Object -First 1
+        if ($exe) { return $exe.Directory.FullName }
+        if (Get-ChildItem -Path $r -Recurse -Filter "*.jar" -File -ErrorAction SilentlyContinue | Select-Object -First 1) {
+            return $r
+        }
+    }
+    return $null
+}
+
+function Find-Java {
+    $c = Get-Command java.exe -ErrorAction SilentlyContinue
+    if ($c) { return $c.Source }
+    foreach ($r in $roots) {
+        # WorldPainter kendi JRE'siyle gelir (genelde jre\bin\java.exe)
+        $j = Get-ChildItem -Path $r -Recurse -Filter "java.exe" -File -ErrorAction SilentlyContinue |
+             Select-Object -First 1
+        if ($j) { return $j.FullName }
+    }
+    return $null
+}
+
+$wp = if ($WpScript) { $WpScript } else { Find-WpScript }
+$dir = if ($InstallDir) { $InstallDir } else { Find-InstallDir }
+$java = Find-Java
+
+if ($Doctor) {
+    Write-Host "Aranan klasorler:"; $roots | ForEach-Object { Write-Host "  $_" }
+    if (-not $roots) { Write-Host "  (hicbiri yok — WorldPainter kurulu gorunmuyor)" -ForegroundColor Yellow }
+    Write-Host "wpscript   : $(if ($wp) { $wp } else { 'bulunamadi' })"
+    Write-Host "kurulum dizini: $(if ($dir) { $dir } else { 'bulunamadi' })"
+    Write-Host "java       : $(if ($java) { $java } else { 'bulunamadi' })"
+    exit 0
+}
 
 if (-not (Test-Path $Manifest)) {
     Write-Host "manifest bulunamadi: $Manifest" -ForegroundColor Red
@@ -21,45 +89,54 @@ if (-not (Test-Path $Manifest)) {
     exit 1
 }
 
-# wpscript Windows'ta wpscript.cmd olarak kurulur; PATH'te yoksa tipik kurulum
-# klasorlerinde ariyoruz.
-function Find-WpScript {
-    foreach ($n in @("wpscript.cmd", "wpscript.bat", "wpscript")) {
-        $c = Get-Command $n -ErrorAction SilentlyContinue
-        if ($c) { return $c.Source }
-    }
-    $guesses = @(
-        "$env:ProgramFiles\WorldPainter\wpscript.cmd",
-        "${env:ProgramFiles(x86)}\WorldPainter\wpscript.cmd",
-        "$env:LOCALAPPDATA\Programs\WorldPainter\wpscript.cmd"
-    )
-    foreach ($g in $guesses) { if (Test-Path $g) { return $g } }
-    return $null
-}
-
-$wp = if ($WpScript) { $WpScript } else { Find-WpScript }
-if (-not $wp) {
-    Write-Host "wpscript bulunamadi." -ForegroundColor Red
-    Write-Host "WorldPainter'i kurun: https://www.worldpainter.net/  (Windows installer)"
-    Write-Host "Kurulduysa yolu elle verin, ornek:"
-    Write-Host '  .\worldpainter\run_worldpainter.ps1 -WpScript "C:\Program Files\WorldPainter\wpscript.cmd"'
-    exit 1
-}
-Write-Host "wpscript: $wp" -ForegroundColor Green
-
-# Bellek ayari: bash'teki JAVA_OPTS=... on ekinin PowerShell karsiligi.
-$env:JAVA_OPTS = "-Xmx${MemoryGB}G"
-Write-Host "JAVA_OPTS = $env:JAVA_OPTS"
-
 $script = Join-Path $PSScriptRoot "import_tiles.js"
 $layerMap = Join-Path $PSScriptRoot "layer_map.json"
 
-& $wp $script $Manifest $Out $layerMap
-if ($LASTEXITCODE -ne 0) {
-    Write-Host "wpscript hata verdi (cikis kodu $LASTEXITCODE)." -ForegroundColor Red
+# Bellek ayari: bash'teki `JAVA_OPTS=...` on ekinin PowerShell karsiligi.
+$env:JAVA_OPTS = "-Xmx${MemoryGB}G"
+
+if ($wp) {
+    Write-Host "wpscript: $wp" -ForegroundColor Green
+    Write-Host "JAVA_OPTS = $env:JAVA_OPTS"
+    & $wp $script $Manifest $Out $layerMap
+    $code = $LASTEXITCODE
+}
+elseif ($dir -and $java) {
+    # wpscript yok: WorldPainter'in script calistiricisini dogrudan cagir.
+    Write-Host "wpscript yok, Java ile dogrudan calistiriliyor." -ForegroundColor Yellow
+    Write-Host "  kurulum: $dir"
+    Write-Host "  java   : $java"
+    $cp = @(
+        (Join-Path $dir "*"),
+        (Join-Path $dir "lib\*"),
+        (Join-Path $dir "app\*"),
+        (Join-Path $dir "app\lib\*")
+    ) -join ";"
+    & $java "-Xmx${MemoryGB}G" "-cp" $cp `
+        "org.pepsoft.worldpainter.tools.scripts.ScriptRunner" `
+        $script $Manifest $Out $layerMap
+    $code = $LASTEXITCODE
+}
+else {
+    Write-Host "WorldPainter bulunamadi." -ForegroundColor Red
+    Write-Host ""
+    Write-Host "1) Kurulum: https://www.worldpainter.net/  (Windows installer)"
+    Write-Host "2) Kuruluysa ne bulundugunu gormek icin:"
+    Write-Host "     .\worldpainter\run_worldpainter.ps1 -Doctor"
+    Write-Host "3) Yolu elle verebilirsiniz:"
+    Write-Host '     .\worldpainter\run_worldpainter.ps1 -WpScript "C:\Program Files\WorldPainter\wpscript.cmd"'
+    Write-Host '     .\worldpainter\run_worldpainter.ps1 -InstallDir "C:\Program Files\WorldPainter"'
+    Write-Host ""
+    Write-Host "Alternatif: WorldPainter'i arayuzden acip build\height altindaki PNG'leri"
+    Write-Host "File > Import > Height map ile elle ice aktarabilirsiniz (docs/VIEWER.md)."
+    exit 1
+}
+
+if ($code -ne 0) {
+    Write-Host "Calistirma hata verdi (cikis kodu $code)." -ForegroundColor Red
     Write-Host "Katman/custom-object cagrilari WorldPainter surumune gore degisir;"
-    Write-Host "import_tiles.js basindaki uyariya bakin."
-    exit $LASTEXITCODE
+    Write-Host "import_tiles.js basindaki uyariya bakin ve ciktiyi paylasin."
+    exit $code
 }
 
 Write-Host "Bitti: $Out" -ForegroundColor Green
